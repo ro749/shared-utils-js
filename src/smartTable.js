@@ -55,6 +55,12 @@ import $ from 'jquery';
                             return `${value} m²`;
                         }
                         break;
+                    case 'foot':
+                        column.render = (data) => {
+                            let value = renderFn ? renderFn(data) : data;
+                            return `${Number(value).toLocaleString('es-MX')} sqft`;
+                        }
+                        break;
                     case 'percent':
                         column.render = (data) => {
                             let value = renderFn ? renderFn(data) : data;
