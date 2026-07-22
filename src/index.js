@@ -1,3 +1,4 @@
+import '../css/index.css';
 import $ from 'jquery';
 import Alpine from 'alpinejs';
 import './lib/bootstrap.bundle.min.js';

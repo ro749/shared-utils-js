@@ -1,0 +1,48 @@
+/* Remix Icon */
+@import "./remixicon.css";
+
+/* Bootstrap */
+@import "./lib/bootstrap.min.css";
+
+/* Apex Chart */
+@import "./lib/apexcharts.css";
+
+/* Data Table */
+@import "./lib/dataTables.min.css";
+
+/* Text Editor */
+@import "./lib/editor-katex.min.css";
+@import "./lib/editor.atom-one-dark.min.css";
+@import "./lib/editor.quill.snow.css";
+
+/* Date Picker */
+@import "./lib/flatpickr.min.css";
+
+/* Calendar */
+@import "./lib/full-calendar.css";
+
+/* Vector Map */
+@import "./lib/jquery-jvectormap-2.0.5.css";
+
+/* Popup */
+@import "./lib/magnific-popup.css";
+
+/* Slick Slider */
+@import "./lib/slick.css";
+
+/* Prism */
+@import "./lib/prism.css";
+
+/* File Upload */
+@import "./lib/file-upload.css";
+
+/* Audio Player */
+@import "./lib/audioplayer.css";
+
+/* Select2 */
+@import "./lib/select2.min.css";
+@import "./lib/select2-bootstrap-5-theme.min.css";
+
+/* Main Styles */
+@import "./style.css";
+@import "./shared-style.css";
