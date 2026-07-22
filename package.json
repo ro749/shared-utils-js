@@ -2,6 +2,7 @@
   "name": "shared-utils",
   "version": "1.0.0",
   "main": "src/index.js",
+  "style": "css/index.css", 
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,5 +12,9 @@
   "peerDependencies": {
     "alpinejs": "^3.15.12",
     "jquery": "^3.0"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./css/*": "./css/*"
   }
 }
