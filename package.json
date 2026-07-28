@@ -11,7 +11,8 @@
   "description": "",
   "peerDependencies": {
     "alpinejs": "^3.15.12",
-    "jquery": "^3.0"
+    "jquery": "^3.0",
+    "select2": "^4.0.13"
   },
   "exports": {
     ".": "./src/index.js",
