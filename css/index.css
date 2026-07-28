@@ -43,6 +43,9 @@
 @import "./lib/select2.min.css";
 @import "./lib/select2-bootstrap-5-theme.min.css";
 
+/* Owl Carousel */
+@import "./lib/owl.css";
+
 /* Main Styles */
 @import "./style.css";
 @import "./shared-style.css";
