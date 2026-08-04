@@ -1,6 +1,5 @@
 import './lib/bootstrap.bundle.min.js';
 import './lib/apexcharts.min.js';
-import './lib/dataTables.min.js';
 import './lib/iconify-icon.min.js';
 import './lib/jquery-ui.min.js';
 import './lib/jquery-jvectormap-2.0.5.min.js';

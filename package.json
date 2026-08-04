@@ -2,9 +2,11 @@
   "name": "shared-utils",
   "version": "1.0.0",
   "main": "src/index.js",
-  "style": "css/index.css", 
+  "style": "css/index.css",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsup",
+    "dev": "tsup --watch"
   },
   "author": "",
   "license": "ISC",
@@ -16,6 +18,14 @@
   },
   "exports": {
     ".": "./src/index.js",
-    "./css/*": "./css/*"
+    "./css/*": "./css/*",
+    "./react": {
+      "import": "./dist/react/index.mjs",
+      "require": "./dist/react/index.js"
+    }
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^7.0.2"
   }
 }
