@@ -4,15 +4,24 @@ import Input from './Input';
 import MoneyInput from './MoneyInput';
 import PercentInput from './PercentInput';
 import NipInput from './NipInput';
+import TextArea from './TextArea';
+import PhoneInput from './PhoneInput';
+import MailInput from './MailInput';
+import Select from './Select';
+
 export default function Form(data) {
   const INPUT_COMPONENTS = {
     text: Input,
-    email: Input,
+    email: MailInput,
+    tel: PhoneInput,
     password: Input,
     number: Input,
     money: MoneyInput,
     percentage: PercentInput,
     pin: NipInput,
+    textarea: TextArea,
+    selector: Select,
+    selectorDB: Select
   };
   const valueRefs = {};
   Object.keys(data.fields).forEach(key => {
@@ -35,7 +44,7 @@ export default function Form(data) {
         return (
         <label>
           {data.fields[key].label}
-          <Component value={valueRefs[key]} id={key} name={key}/>
+          <Component value={valueRefs[key]} id={key} name={key} max={data.fields[key].max} options={data.fields[key].options} />
         </label>
         );
       })}

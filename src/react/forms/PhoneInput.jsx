@@ -1,30 +1,25 @@
 import React, { useRef } from 'react';
 import Input from './Input';
 
-const NipInput = ({value, max, ...props}) => {
+const PhoneInput = ({value, ...props}) => {
     const ref = useRef(null);
     const handleChange = (e) => {
-        console.log(max);
-        console.log(value.current.length);
-        if (max !== undefined && value.current.length > max) {
-            value.current = value.current.substring(0, max);
-            ref.current.value = value.current;
-        }
+        value.current = value.current.replace(/\D/g, '');
+        ref.current.value = value.current;
         if(props.onChange) {
             props.onChange(value.current);
         }
     };
- 
+
     return (
         <Input 
             ref={ref}
             onChange={handleChange}
-            type="password"
+            type="tel"
             value={value}
             {...props}
-            
         />
     )
 }
 
-export default NipInput;
+export default PhoneInput;
