@@ -11,5 +11,8 @@ export function mount(el, name, config) {
   const Component = registry[name];
   const root = createRoot(el);
   root.render(<Component {...config} />);
+  el.removeAttribute('data-config');
+  el.removeAttribute('data-widget');
+
   return () => root.unmount();
 }

@@ -173,3 +173,10 @@ p{
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+form{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
