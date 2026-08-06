@@ -4,8 +4,7 @@ import Input from './Input';
 const NipInput = ({value, max, ...props}) => {
     const ref = useRef(null);
     const handleChange = (e) => {
-        console.log(max);
-        console.log(value.current.length);
+        value.current = value.current.replace(/\D/g, '');
         if (max !== undefined && value.current.length > max) {
             value.current = value.current.substring(0, max);
             ref.current.value = value.current;
