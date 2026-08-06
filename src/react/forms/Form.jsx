@@ -1,30 +1,13 @@
 import React from 'react';
 import axios from 'axios';
-import Input from './Input';
-import MoneyInput from './MoneyInput';
-import PercentInput from './PercentInput';
-import NipInput from './NipInput';
-import TextArea from './TextArea';
-import PhoneInput from './PhoneInput';
-import MailInput from './MailInput';
-import Select from './Select';
+import FormField from './FormField';
+import Dialog from './Dialog';
 
 export default function Form(data) {
-  const INPUT_COMPONENTS = {
-    text: Input,
-    email: MailInput,
-    tel: PhoneInput,
-    password: Input,
-    number: Input,
-    money: MoneyInput,
-    percentage: PercentInput,
-    pin: NipInput,
-    textarea: TextArea,
-    selector: Select,
-    selector_db: Select
-  };
   const valueRefs = {};
   const [errors, setErrors] = React.useState({});
+  const [resetKey, setResetKey] = React.useState(0);
+  const [showSuccessDialog, setShowSuccessDialog] = React.useState(false);
   Object.keys(data.fields).forEach(key => {
     valueRefs[key] = React.useRef('');
   });
@@ -47,24 +30,45 @@ export default function Form(data) {
       return;
     }
 
-    axios.post('/form/' + data.id, formData);
+    axios.post('/form/' + data.id, formData)
+      .then(response => {
+        setShowSuccessDialog(true);
+        Object.keys(data.fields).forEach(key => {
+          valueRefs[key].current = '';
+        });
+        setErrors({});
+        setResetKey(prev => prev + 1);
+      })
+      .catch(error => {
+        if (error.response && error.response.data && error.response.data.errors) {
+          setErrors(error.response.data.errors);
+        }
+      });
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      {Object.keys(data.fields).map(key => {
-        const Component = INPUT_COMPONENTS[data.fields[key].type];
-        return (
-        <label>
-          {data.fields[key].label}{data.fields[key].required && <span>*</span>}
-          <Component value={valueRefs[key]} id={key} name={key} form_id={data.id} max={data.fields[key].max} options={data.fields[key].options} search={data.fields[key].search} dynamic={data.fields[key].dynamic}/>
-          {errors[key] && <span className="error-message">{errors[key]}</span>}
-        </label>
-        );
-      })}
-      <button type="submit">{data.submit_text}</button>
-    </form>
-
+    <>
+      <form onSubmit={handleSubmit}>
+        {Object.keys(data.fields).map(key => (
+          <FormField
+            key={key}
+            field={data.fields[key]}
+            fieldName={key}
+            value={valueRefs[key]}
+            form_id={data.id}
+            error={errors[key]}
+          />
+        ))}
+        <button type="submit">{data.submit_text}</button>
+      </form>
+      <Dialog 
+        isOpen={showSuccessDialog} 
+        onClose={() => setShowSuccessDialog(false)}
+        title="Success"
+      >
+        {data.success_msg || 'Form submitted successfully'}
+      </Dialog>
+    </>
   );
 };
 
