@@ -180,3 +180,7 @@ form{
     gap: 1rem;
     align-items: center;
 }
+
+.error-message{
+    color: red;
+}

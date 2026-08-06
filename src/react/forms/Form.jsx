@@ -21,9 +21,10 @@ export default function Form(data) {
     pin: NipInput,
     textarea: TextArea,
     selector: Select,
-    selectorDB: Select
+    selector_db: Select
   };
   const valueRefs = {};
+  const [errors, setErrors] = React.useState({});
   Object.keys(data.fields).forEach(key => {
     valueRefs[key] = React.useRef('');
   });
@@ -31,9 +32,21 @@ export default function Form(data) {
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = {};
+    const newErrors = {};
+    
     Object.keys(data.fields).forEach(key => {
       formData[key] = valueRefs[key].current;
+      if (data.fields[key].required && !valueRefs[key].current) {
+        newErrors[key] = `${data.fields[key].label} is required`;
+      }
     });
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      return;
+    }
+
     axios.post('/form/' + data.id, formData);
   };
 
@@ -43,8 +56,9 @@ export default function Form(data) {
         const Component = INPUT_COMPONENTS[data.fields[key].type];
         return (
         <label>
-          {data.fields[key].label}
-          <Component value={valueRefs[key]} id={key} name={key} max={data.fields[key].max} options={data.fields[key].options} />
+          {data.fields[key].label}{data.fields[key].required && <span>*</span>}
+          <Component value={valueRefs[key]} id={key} name={key} form_id={data.id} max={data.fields[key].max} options={data.fields[key].options} search={data.fields[key].search} dynamic={data.fields[key].dynamic}/>
+          {errors[key] && <span className="error-message">{errors[key]}</span>}
         </label>
         );
       })}
