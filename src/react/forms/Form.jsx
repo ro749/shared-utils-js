@@ -9,18 +9,30 @@ export default function Form(data) {
   const [resetKey, setResetKey] = React.useState(0);
   const [showSuccessDialog, setShowSuccessDialog] = React.useState(false);
   Object.keys(data.fields).forEach(key => {
-    valueRefs[key] = React.useRef('');
+    valueRefs[key] = React.useRef(data.fields[key].type === 'image' ? null : '');
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const formData = {};
+    const formData = new FormData();
     const newErrors = {};
     
     Object.keys(data.fields).forEach(key => {
-      formData[key] = valueRefs[key].current;
-      if (data.fields[key].required && !valueRefs[key].current) {
-        newErrors[key] = `${data.fields[key].label} is required`;
+      const fieldValue = valueRefs[key].current;
+      const isImageField = data.fields[key].type === 'image';
+      if (data.fields[key].required) {
+        if (isImageField && fieldValue === null) {
+          newErrors[key] = `${data.fields[key].label} is required`;
+        } else if (!isImageField && !fieldValue) {
+          newErrors[key] = `${data.fields[key].label} is required`;
+        }
+      }
+      if (isImageField) {
+        if (fieldValue) {
+          formData.append(key, fieldValue);
+        }
+      } else {
+        formData.append(key, fieldValue || '');
       }
     });
 
@@ -30,11 +42,15 @@ export default function Form(data) {
       return;
     }
 
-    axios.post('/form/' + data.id, formData)
+    axios.post('/form/' + data.id, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
       .then(response => {
         setShowSuccessDialog(true);
         Object.keys(data.fields).forEach(key => {
-          valueRefs[key].current = '';
+          valueRefs[key].current = data.fields[key].type === 'image' ? null : '';
         });
         setErrors({});
         setResetKey(prev => prev + 1);
@@ -45,20 +61,40 @@ export default function Form(data) {
         }
       });
   };
-
+  console.log('working');
+  console.log(data.layout && data.layout.length > 0);
   return (
     <>
       <form onSubmit={handleSubmit}>
-        {Object.keys(data.fields).map(key => (
-          <FormField
-            key={key}
-            field={data.fields[key]}
-            fieldName={key}
-            value={valueRefs[key]}
-            form_id={data.id}
-            error={errors[key]}
-          />
-        ))}
+        {data.layout && data.layout.length > 0 ? (
+          data.layout.map((row, rowIndex) => (
+            <div key={rowIndex} className={`input-row ${data.id}-input-row`}>
+              {row.map(key => (
+                <FormField
+                  key={key}
+                  field={data.fields[key]}
+                  fieldName={key}
+                  value={valueRefs[key]}
+                  form_id={data.id}
+                  error={errors[key]}
+                  resetKey={resetKey}
+                />
+              ))}
+            </div>
+          ))
+        ) : (
+          Object.keys(data.fields).map(key => (
+            <FormField
+              key={key}
+              field={data.fields[key]}
+              fieldName={key}
+              value={valueRefs[key]}
+              form_id={data.id}
+              error={errors[key]}
+              resetKey={resetKey}
+            />
+          ))
+        )}
         <button type="submit">{data.submit_text}</button>
       </form>
       <Dialog 

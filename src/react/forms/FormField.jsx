@@ -7,6 +7,7 @@ import TextArea from './TextArea';
 import PhoneInput from './PhoneInput';
 import MailInput from './MailInput';
 import Select from './Select';
+import ImageUploader from './ImageUploader';
 
 const INPUT_COMPONENTS = {
   text: Input,
@@ -19,10 +20,11 @@ const INPUT_COMPONENTS = {
   pin: NipInput,
   textarea: TextArea,
   selector: Select,
-  selector_db: Select
+  selector_db: Select,
+  image: ImageUploader
 };
 
-const FormField = ({ field, fieldName, value, form_id, error }) => {
+const FormField = ({ field, fieldName, value, form_id, error, resetKey }) => {
   const Component = INPUT_COMPONENTS[field.type];
 
   return (
@@ -37,6 +39,8 @@ const FormField = ({ field, fieldName, value, form_id, error }) => {
         options={field.options} 
         search={field.search} 
         dynamic={field.dynamic}
+        imageUrl={field.imageUrl}
+        resetKey={resetKey}
       />
       {error && <span className="error-message">{error}</span>}
     </label>
