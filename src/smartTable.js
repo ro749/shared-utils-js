@@ -87,6 +87,10 @@ import $ from 'jquery';
                     case '':
                     case null:
                         column.render = (data) => {
+                            let value = renderFn ? renderFn(data) : data;
+                            if(value == null || value === ''){
+                                return 0;
+                            }
                             return renderFn ? renderFn(data) : '<p class="data-'+col+'">'+data+'</p>';
                         }
                         break;
