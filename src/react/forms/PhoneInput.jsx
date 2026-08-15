@@ -1,19 +1,14 @@
 import React, { useRef } from 'react';
 import Input from './Input';
 
-const PhoneInput = ({value, ...props}) => {
-    const ref = useRef(null);
+const PhoneInput = ({value, field, ...props}) => {
     const handleChange = (e) => {
-        value.current = value.current.replace(/\D/g, '');
-        ref.current.value = value.current;
-        if(props.onChange) {
-            props.onChange(value.current);
-        }
+        var newValue = e.target.value.replace(/\D/g, '');
+        field.handleChange(newValue);
     };
 
     return (
         <Input 
-            ref={ref}
             onChange={handleChange}
             type="tel"
             value={value}

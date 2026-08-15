@@ -24,26 +24,41 @@ const INPUT_COMPONENTS = {
   image: ImageUploader
 };
 
-const FormField = ({ field, fieldName, value, form_id, error, resetKey }) => {
+const FormField = ({ form, field, fieldName, value, form_id, error, resetKey }) => {
   const Component = INPUT_COMPONENTS[field.type];
 
   return (
-    <label>
-      {field.label}{field.required && <span>*</span>}
-      <Component 
-        value={value} 
-        id={fieldName} 
-        name={fieldName} 
-        form_id={form_id} 
-        max={field.max} 
-        options={field.options} 
-        search={field.search} 
-        dynamic={field.dynamic}
-        imageUrl={field.imageUrl}
-        resetKey={resetKey}
+    <form.Field 
+      name={fieldName}
+      children={(fieldProps) => {
+        console.log('fieldProps.state.meta');
+        console.log(fieldProps.state.meta);
+        return (
+        <>
+          <label>
+            {field.label}{field.required && <span>*</span>}
+            <Component 
+              field={fieldProps}
+              id={fieldName} 
+              form_id={form_id} 
+              max={field.max} 
+              options={field.options} 
+              search={field.search} 
+              dynamic={field.dynamic}
+              imageUrl={field.imageUrl}
+              resetKey={resetKey}
+              value={fieldProps.state.value}
+            />
+          </label>
+          {fieldProps.state.meta.errors.length > 0 && (
+            <div className="error-message">
+              {fieldProps.state.meta.errors.map((error, index) => (
+                <div key={index}>{error}</div>
+              ))}
+            </div>
+          )}
+        </>)}}
       />
-      {error && <span className="error-message">{error}</span>}
-    </label>
   );
 };
 

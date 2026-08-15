@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 
-const ImageUploader = ({ value, id, name, imageUrl, resetKey }) => {
+const ImageUploader = ({ value, field, id, name, imageUrl }) => {
   const [preview, setPreview] = useState(imageUrl || null);
   const fileInputRef = useRef(null);
 
@@ -9,14 +9,12 @@ const ImageUploader = ({ value, id, name, imageUrl, resetKey }) => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  }, [resetKey, imageUrl]);
+  }, [imageUrl]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (value) {
-        value.current = file;
-      }
+      field.handleChange(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result);

@@ -1,26 +1,20 @@
 import React, { useRef } from 'react';
 
-const Input = ({ref, value, ...props}) => {
-      const internalRef = useRef(null);
+const Input = ({ref, value, field, ...props}) => {
+    const internalRef = useRef(null);
         const inputRef = ref || internalRef;
 
-    const handleChange = (e) => {
-        if (value) {
-            value.current = e.target.value;
-        }
-        if (props.onChange) {
-            props.onChange(e);
-        }
-    };
-
+    
     return (
         <input 
             ref={inputRef}
-            onChange={handleChange}
-            onKeyDown={props.onKeyDown}
-            className="form-control"
             id={props.id}
-            type={props.type || 'text'}
+            name={props.id}
+            type={props.type || "text"}
+            value={value}
+            className="form-control"
+            onChange={(e) => props.onChange ? props.onChange(e) : field.handleChange(e.target.value)}
+            onKeyDown={(e) => props.onKeyDown!=null && props.onKeyDown(e)}
         />
     )
 }

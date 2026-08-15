@@ -1,17 +1,15 @@
 import React, { useRef } from 'react';
 import Input from './Input';
 
-const NipInput = ({value, max, ...props}) => {
+const NipInput = ({value, field, max, ...props}) => {
     const ref = useRef(null);
     const handleChange = (e) => {
-        value.current = value.current.replace(/\D/g, '');
-        if (max !== undefined && value.current.length > max) {
-            value.current = value.current.substring(0, max);
-            ref.current.value = value.current;
+        var newValue = e.target.value.replace(/\D/g, '');
+        if (max !== undefined && newValue.length > max) {
+            newValue = newValue.substring(0, max);
+            
         }
-        if(props.onChange) {
-            props.onChange(value.current);
-        }
+        field.handleChange(newValue);
     };
  
     return (
@@ -20,6 +18,7 @@ const NipInput = ({value, max, ...props}) => {
             onChange={handleChange}
             type="password"
             value={value}
+            field={field}
             {...props}
             
         />

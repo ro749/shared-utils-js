@@ -2,16 +2,11 @@ import React, { useRef, useCallback } from 'react';
 import ReactSelect from 'react-select';
 import AsyncSelect from 'react-select/async';
 
-const Select = ({value, options, dynamic, ...props}) => {
+const Select = ({value, field, options, dynamic, ...props}) => {
     const ref = useRef(null);
 
     const handleChange = (selectedOption) => {
-        if (value) {
-            value.current = selectedOption ? selectedOption.value : '';
-        }
-        if (props.onChange) {
-            props.onChange(selectedOption);
-        }
+        field.handleChange(selectedOption ? selectedOption.value : '');
     };
     const selectOptions = Object.keys(options).map(key => ({
             value: key,
@@ -38,9 +33,8 @@ const Select = ({value, options, dynamic, ...props}) => {
     else{
         const loadOptions = useCallback(async (inputValue) => {
             if (!inputValue || inputValue.length < 1) return [];
-            console.log('Loading options for:', inputValue);
             try {
-                const response = await axios.get('/form/' + props.form_id + '/search/' + props.name, {
+                const response = await axios.get('/form/' + props.form_id + '/search/' + props.id, {
                     params: {
                         q: inputValue
                     }

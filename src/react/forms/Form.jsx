@@ -2,82 +2,56 @@ import React from 'react';
 import axios from 'axios';
 import FormField from './FormField';
 import Dialog from './Dialog';
+import { useForm } from '@tanstack/react-form'
+
 
 export default function Form(data) {
-  const valueRefs = {};
-  const [errors, setErrors] = React.useState({});
-  const [resetKey, setResetKey] = React.useState(0);
   const [showSuccessDialog, setShowSuccessDialog] = React.useState(false);
-  Object.keys(data.fields).forEach(key => {
-    valueRefs[key] = React.useRef(data.fields[key].type === 'image' ? null : '');
-  });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    const newErrors = {};
-    
-    Object.keys(data.fields).forEach(key => {
-      const fieldValue = valueRefs[key].current;
-      const isImageField = data.fields[key].type === 'image';
-      if (data.fields[key].required) {
-        if (isImageField && fieldValue === null) {
-          newErrors[key] = `${data.fields[key].label} is required`;
-        } else if (!isImageField && !fieldValue) {
-          newErrors[key] = `${data.fields[key].label} is required`;
-        }
-      }
-      if (isImageField) {
-        if (fieldValue) {
-          formData.append(key, fieldValue);
-        }
-      } else {
-        formData.append(key, fieldValue || '');
-      }
-    });
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length > 0) {
-      return;
-    }
-
-    axios.post('/form/' + data.id, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-      .then(response => {
+  const form = useForm({
+    defaultValues: Object.fromEntries(
+      Object.keys(data.fields).map(key => [key, data.fields[key].type === 'image' ? null : ''])
+    ),
+    onSubmit: ({value,formApi}) => {
+      console.log(value);
+      axios.post(`/form/${data.id}`, value).
+      then(() => {
         setShowSuccessDialog(true);
-        Object.keys(data.fields).forEach(key => {
-          valueRefs[key].current = data.fields[key].type === 'image' ? null : '';
+        form.reset();
+      }).
+      catch((error) => {
+        const apiErrors = error.response.data.errors;
+        const fieldErrors = Object.fromEntries(
+          Object.entries(apiErrors).map(([field, messages]) => [field, messages])
+        );
+
+        formApi.setErrorMap({
+          onSubmit: {
+            fields: fieldErrors,
+            form: "Submission failed. Please correct the errors below."
+          }
         });
-        setErrors({});
-        setResetKey(prev => prev + 1);
-      })
-      .catch(error => {
-        if (error.response && error.response.data && error.response.data.errors) {
-          setErrors(error.response.data.errors);
-        }
       });
-  };
-  console.log('working');
-  console.log(data.layout && data.layout.length > 0);
+    }
+  });
   return (
     <>
-      <form onSubmit={handleSubmit}>
+      <form 
+      onSubmit={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          form.handleSubmit()
+        }}
+      >
         {data.layout && data.layout.length > 0 ? (
           data.layout.map((row, rowIndex) => (
             <div key={rowIndex} className={`input-row ${data.id}-input-row`}>
               {row.map(key => (
                 <FormField
+                  form={form}
                   key={key}
                   field={data.fields[key]}
                   fieldName={key}
-                  value={valueRefs[key]}
                   form_id={data.id}
-                  error={errors[key]}
-                  resetKey={resetKey}
                 />
               ))}
             </div>
@@ -85,13 +59,11 @@ export default function Form(data) {
         ) : (
           Object.keys(data.fields).map(key => (
             <FormField
+              form={form}
               key={key}
               field={data.fields[key]}
               fieldName={key}
-              value={valueRefs[key]}
               form_id={data.id}
-              error={errors[key]}
-              resetKey={resetKey}
             />
           ))
         )}

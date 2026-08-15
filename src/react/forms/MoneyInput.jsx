@@ -1,8 +1,13 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import Input from './Input';
-const MoneyInput = ({value, ...props}) => {
+const MoneyInput = ({value, field, ...props}) => {
     const ref = useRef(null);
     const cursorRef = useRef(0);
+    
+    useEffect(() => {
+        ref.current.setSelectionRange(cursorRef.current, cursorRef.current);
+    }, [value]);
+
     function format(value) {
         if (value === '') return '';
         const [integer, decimal] = value.split('.');
@@ -24,15 +29,15 @@ const MoneyInput = ({value, ...props}) => {
         const noNumericChars = e.target.value.slice(0, cursor).replace(/[0-9]/g, '').length;
         cursor -= noNumericChars;
         if(/^[0-9]$/.test(e.key)){
+            var newValue = value.slice(0, cursor) + e.key + value.slice(cursor);
             cursor += 1;
-            var newValue = value.current.slice(0, cursor) + e.key + value.current.slice(cursor);
         }
         else if(e.key == 'Backspace'){
             if(cursor == 0){
                 return;
             }
             cursor -= 1;
-            var newValue = value.current.slice(0, cursor) + value.current.slice(cursor + 1);
+            var newValue = value.slice(0, cursor) + value.slice(cursor + 1);
         }
         else{
             return;
@@ -50,14 +55,14 @@ const MoneyInput = ({value, ...props}) => {
         if(currentCount == cursor){
             cursorRef.current = currentPosition;
         }
-        value.current = newValue;
-        ref.current.value = '$' + format(newValue);
+        field.handleChange(newValue);
     }
-
     return (
         <Input 
             ref={ref}
             onKeyDown={handleKeyDown}
+            value={'$' + format(value)}
+            field={field}
             {...props}
         />
     )
