@@ -5,21 +5,21 @@ import Dialog from './Dialog';
 import { useForm } from '@tanstack/react-form'
 
 
-export default function Form(data) {
+export default function Form(config) {
   const [showSuccessDialog, setShowSuccessDialog] = React.useState(false);
   const form = useForm({
     defaultValues: Object.fromEntries(
-      Object.keys(data.fields).map(key => [key, data.fields[key].type === 'image' ? null : ''])
+      Object.keys(config.fields).map(key => [key, config.fields[key].type === 'image' ? null : ''])
     ),
     onSubmit: ({value,formApi}) => {
       console.log(value);
-      axios.post(`/form/${data.id}`, value).
+      axios.post(`/form/${config.id}`, value).
       then(() => {
         setShowSuccessDialog(true);
         form.reset();
       }).
       catch((error) => {
-        const apiErrors = error.response.data.errors;
+        const apiErrors = error.response.config.errors;
         const fieldErrors = Object.fromEntries(
           Object.entries(apiErrors).map(([field, messages]) => [field, messages])
         );
@@ -42,39 +42,39 @@ export default function Form(data) {
           form.handleSubmit()
         }}
       >
-        {data.layout && data.layout.length > 0 ? (
-          data.layout.map((row, rowIndex) => (
-            <div key={rowIndex} className={`input-row ${data.id}-input-row`}>
+        {config.layout && config.layout.length > 0 ? (
+          config.layout.map((row, rowIndex) => (
+            <div key={rowIndex} className={`input-row ${config.id}-input-row`}>
               {row.map(key => (
                 <FormField
                   form={form}
                   key={key}
-                  field={data.fields[key]}
+                  field={config.fields[key]}
                   fieldName={key}
-                  form_id={data.id}
+                  form_id={config.id}
                 />
               ))}
             </div>
           ))
         ) : (
-          Object.keys(data.fields).map(key => (
+          Object.keys(config.fields).map(key => (
             <FormField
               form={form}
               key={key}
-              field={data.fields[key]}
+              field={config.fields[key]}
               fieldName={key}
-              form_id={data.id}
+              form_id={config.id}
             />
           ))
         )}
-        <button type="submit">{data.submit_text}</button>
+        <button type="submit">{config.submit_text}</button>
       </form>
       <Dialog 
         isOpen={showSuccessDialog} 
         onClose={() => setShowSuccessDialog(false)}
         title="Success"
       >
-        {data.success_msg || 'Form submitted successfully'}
+        {config.success_msg || 'Form submitted successfully'}
       </Dialog>
     </>
   );
