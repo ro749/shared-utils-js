@@ -104,6 +104,13 @@ export default function Table(config) {
       <div className="table-pagination">
         <button
           type="button"
+          onClick={() => table.firstPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          First
+        </button>
+        <button
+          type="button"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
@@ -119,9 +126,16 @@ export default function Table(config) {
         >
           Next
         </button>
+        <button
+          type="button"
+          onClick={() => table.lastPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Last
+        </button>
         <select
           value={pagination.pageSize}
-          onChange={(event) => setPagination({ pageIndex: 0, pageSize: Number(event.target.value) })}
+          onChange={(event) => table.setPageSize(Number(event.target.value))}
         >
           {(config.pageSizes ?? [10, 25, 50, 100]).map((size) => (
             <option key={size} value={size}>{size} per page</option>
