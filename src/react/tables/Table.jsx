@@ -62,6 +62,16 @@ export default function Table(config) {
 
   return (
     <div className="demo-root">
+      <div className="table-page-size">
+        <select
+          value={pagination.pageSize}
+          onChange={(event) => table.setPageSize(Number(event.target.value))}
+        >
+          {(config.pageSizes ?? [10, 25, 50, 100]).map((size) => (
+            <option key={size} value={size}>{size} per page</option>
+          ))}
+        </select>
+      </div>
       <table>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -133,14 +143,6 @@ export default function Table(config) {
         >
           Last
         </button>
-        <select
-          value={pagination.pageSize}
-          onChange={(event) => table.setPageSize(Number(event.target.value))}
-        >
-          {(config.pageSizes ?? [10, 25, 50, 100]).map((size) => (
-            <option key={size} value={size}>{size} per page</option>
-          ))}
-        </select>
       </div>
       <div className="spacer-md" />
     </div>
