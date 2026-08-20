@@ -3,6 +3,7 @@ import {
   createColumnHelper,
   globalFilteringFeature,
   rowPaginationFeature,
+  rowSortingFeature ,
   tableFeatures,
   useTable,
 } from '@tanstack/react-table'
@@ -22,12 +23,13 @@ export default function Table(config) {
     );
   }
   const columns = columnHelper.columns(cols);
-  const features = tableFeatures({ rowPaginationFeature, globalFilteringFeature });
+  const features = tableFeatures({ rowPaginationFeature, globalFilteringFeature, rowSortingFeature  });
 
   const pageSize = config.pageSize ?? config.page_length ?? 10;
   const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
   const [globalFilter, setGlobalFilter] = useState('');
+  const [sorting, setSorting] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const table = useTable({
     features,
@@ -35,10 +37,12 @@ export default function Table(config) {
     columns,
     manualPagination: true,
     manualFiltering: true,
+    manualSorting: true,
     rowCount: totalRows,
-    state: { pagination, globalFilter },
+    state: { pagination, globalFilter, sorting },
     onPaginationChange: setPagination,
     onGlobalFilterChange: setGlobalFilter,
+    onSortingChange: setSorting,
   });
 
   useEffect(() => {
@@ -49,6 +53,12 @@ export default function Table(config) {
     });
     const searchParam = config.searchParam ?? 'search[value]';
     if (globalFilter && searchParam) params.set(searchParam, globalFilter);
+    
+    if (sorting.length > 0) {
+      const sort = sorting[0];
+      params.set('order[0][column]', sort.id);
+      params.set('order[0][dir]', sort.desc ? 'desc' : 'asc');
+    }
 
     fetch(`/table/${config.id}/get?${params}`, { signal: controller.signal })
       .then((res) => {
@@ -64,7 +74,7 @@ export default function Table(config) {
       });
 
     return () => controller.abort();
-  }, [config.id, pagination.pageIndex, pagination.pageSize, globalFilter, config.searchParam]);
+  }, [config.id, pagination.pageIndex, pagination.pageSize, globalFilter, sorting, config.searchParam]);
 
   useEffect(() => {
     setPagination((current) => current.pageIndex === 0
@@ -98,9 +108,19 @@ export default function Table(config) {
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <th key={header.id}>
+                <th 
+                  key={header.id}
+                  onClick={header.column.getToggleSortingHandler()}
+                  style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
+                >
                   {header.isPlaceholder ? null : (
-                    <table.FlexRender header={header} />
+                    <div>
+                      <table.FlexRender header={header} />
+                      {{
+                        asc: ' 🔼',
+                        desc: ' 🔽',
+                      }[header.column.getIsSorted()] ?? null}
+                    </div>
                   )}
                 </th>
               ))}
