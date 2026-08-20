@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   createColumnHelper,
+  globalFilteringFeature,
   rowPaginationFeature,
   tableFeatures,
   useTable,
@@ -21,20 +22,23 @@ export default function Table(config) {
     );
   }
   const columns = columnHelper.columns(cols);
-  const features = tableFeatures({ rowPaginationFeature });
+  const features = tableFeatures({ rowPaginationFeature, globalFilteringFeature });
 
   const pageSize = config.pageSize ?? config.page_length ?? 10;
   const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
+  const [globalFilter, setGlobalFilter] = useState('');
   const [totalRows, setTotalRows] = useState(0);
   const table = useTable({
     features,
     data,
     columns,
     manualPagination: true,
+    manualFiltering: true,
     rowCount: totalRows,
-    state: { pagination },
+    state: { pagination, globalFilter },
     onPaginationChange: setPagination,
+    onGlobalFilterChange: setGlobalFilter,
   });
 
   useEffect(() => {
@@ -43,6 +47,8 @@ export default function Table(config) {
       start: String(pagination.pageIndex * pagination.pageSize),
       length: String(pagination.pageSize),
     });
+    const searchParam = config.searchParam ?? 'search[value]';
+    if (globalFilter && searchParam) params.set(searchParam, globalFilter);
 
     fetch(`/table/${config.id}/get?${params}`, { signal: controller.signal })
       .then((res) => {
@@ -58,19 +64,34 @@ export default function Table(config) {
       });
 
     return () => controller.abort();
-  }, [config.id, pagination.pageIndex, pagination.pageSize]);
+  }, [config.id, pagination.pageIndex, pagination.pageSize, globalFilter, config.searchParam]);
+
+  useEffect(() => {
+    setPagination((current) => current.pageIndex === 0
+      ? current
+      : { ...current, pageIndex: 0 });
+  }, [globalFilter]);
 
   return (
     <div className="demo-root">
-      <div className="table-page-size">
-        <select
-          value={pagination.pageSize}
-          onChange={(event) => table.setPageSize(Number(event.target.value))}
-        >
-          {(config.pageSizes ?? [10, 25, 50, 100]).map((size) => (
-            <option key={size} value={size}>{size} per page</option>
-          ))}
-        </select>
+      <div className="table-controls">
+          <input
+            type="search"
+            value={globalFilter}
+            placeholder={config.searchPlaceholder ?? 'Search...'}
+            aria-label={config.searchLabel ?? 'Search table'}
+            onChange={(event) => table.setGlobalFilter(event.target.value)}
+          />
+        <div className="table-page-size">
+          <select
+            value={pagination.pageSize}
+            onChange={(event) => table.setPageSize(Number(event.target.value))}
+          >
+            {(config.pageSizes ?? [10, 25, 50, 100]).map((size) => (
+              <option key={size} value={size}>{size} per page</option>
+            ))}
+          </select>
+        </div>
       </div>
       <table>
         <thead>
