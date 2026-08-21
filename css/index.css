@@ -49,3 +49,6 @@
 /* Main Styles */
 @import "./style.css";
 @import "./shared-style.css";
+
+/* TanStack Table */
+@import "./table.css";
