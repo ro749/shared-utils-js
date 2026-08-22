@@ -7,6 +7,7 @@ import {
   tableFeatures,
   useTable
 } from '@tanstack/react-table'
+import IconMap from '../icons/IconMap.jsx';
 
 
 export default function Table(config) {
@@ -21,6 +22,31 @@ export default function Table(config) {
         }
       )
     );
+  }
+  if(config.buttons){
+    cols.push(columnHelper.display({
+      id: 'actions',
+      cell: (info) => (
+        <div className="normal-buttons">
+          {config.buttons.map((button, index) => {
+            const IconComponent = IconMap[button.icon]
+            const Wrapper = button.view ? "a" : React.Fragment;
+
+            return (
+              <Wrapper href={button.view?(button.view.url+'?'+button.view.name+'='+info.row.original[button.view.param]):undefined}>
+              <button
+                key={button.icon ?? index}
+                type="button"
+                className={`btn w-32-px h-32-px rounded-circle ${button.background_color_class} ${button.text_color_class} d-inline-flex align-items-center justify-content-center`}
+              >
+                <IconComponent/>
+              </button>
+              </Wrapper>
+            )
+          })}
+        </div>
+      ),
+    }));
   }
   const columns = columnHelper.columns(cols);
   const features = tableFeatures({ rowPaginationFeature, globalFilteringFeature, rowSortingFeature  });
@@ -42,6 +68,7 @@ export default function Table(config) {
     }
     return initialFilters;
   });
+  const [deletePopup, setDeletePopup] = useState({ show: false, warning: '', row: null });
   const table = useTable({
     features,
     data,
@@ -115,6 +142,47 @@ export default function Table(config) {
         return { ...prev, [filterKey]: optionKey };
       }
     });
+  };
+
+  const handleDeleteClick = (row) => {
+    const warning = config.delete?.warning ?? '';
+    const matches = [...warning.matchAll(/\{(.*?)\}/g)];
+    const args = matches.map(match => match[1].trim());
+    let processedWarning = warning;
+    for (const arg of args) {
+      processedWarning = processedWarning.replace('{' + arg + '}', row[arg]);
+    }
+    setDeletePopup({ show: true, warning: processedWarning, row });
+  };
+
+  const handleConfirmDelete = () => {
+    const formData = new FormData();
+    formData.append('id', deletePopup.row.id);
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '');
+    Object.entries(activeFilters).forEach(([key, value]) => {
+      formData.append(`filters[${key}]`, value);
+    });
+
+    fetch(`/table/${config.id}/delete`, {
+      method: 'POST',
+      body: formData,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Unable to delete row (${res.status})`);
+        return res.json();
+      })
+      .then(() => {
+        setDeletePopup({ show: false, warning: '', row: null });
+        setData((prevData) => prevData.filter((item) => item.id !== deletePopup.row.id));
+        setTotalRows((prev) => Math.max(0, prev - 1));
+      })
+      .catch((error) => {
+        console.error('Delete error:', error);
+      });
+  };
+
+  const handleCloseDeletePopup = () => {
+    setDeletePopup({ show: false, warning: '', row: null });
   };
 
   return (

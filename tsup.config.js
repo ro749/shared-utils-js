@@ -1,4 +1,5 @@
 import { defineConfig } from 'tsup';
+import Icons from 'unplugin-icons/esbuild';
 export default defineConfig([
   {
     entry: ['src/index.js'],
@@ -10,5 +11,8 @@ export default defineConfig([
     outDir: 'dist/react',
     format: ['cjs', 'esm'],
     external: ['react', 'react-dom'],
+    esbuildPlugins: [
+      Icons({ compiler: 'jsx', jsx: 'react' }),
+    ],
   },
 ]);
