@@ -528,14 +528,16 @@ function Table(config) {
     cols.push(columnHelper.display({
       id: "actions",
       cell: (info) => /* @__PURE__ */ React16.createElement("div", { className: "normal-buttons" }, config.buttons.map((button, index) => {
+        var _a;
         const IconComponent = IconMap_default[button.icon];
         const Wrapper = button.view ? "a" : React16.Fragment;
+        const isDeleteButton = (_a = button.class) == null ? void 0 : _a.includes("delete-btn");
         return /* @__PURE__ */ React16.createElement(Wrapper, { href: button.view ? button.view.url + "?" + button.view.name + "=" + info.row.original[button.view.param] : void 0 }, /* @__PURE__ */ React16.createElement(
           "button",
           {
-            key: button.icon ?? index,
             type: "button",
-            className: `btn w-32-px h-32-px rounded-circle ${button.background_color_class} ${button.text_color_class} d-inline-flex align-items-center justify-content-center`
+            className: `btn w-32-px h-32-px rounded-circle ${button.background_color_class} ${button.text_color_class} d-inline-flex align-items-center justify-content-center ${button.class ?? ""}`,
+            onClick: isDeleteButton ? () => handleDeleteClick(info.row.original) : void 0
           },
           /* @__PURE__ */ React16.createElement(IconComponent, null)
         ));

@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import FormField from './FormField';
-import Dialog from './Dialog';
+import Dialog from '../dialogs/Dialog';
 import { useForm } from '@tanstack/react-form'
 
 

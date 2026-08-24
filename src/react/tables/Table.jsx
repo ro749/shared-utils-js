@@ -8,6 +8,7 @@ import {
   useTable
 } from '@tanstack/react-table'
 import IconMap from '../icons/IconMap.jsx';
+import Dialog from '../dialogs/Dialog';
 
 
 export default function Table(config) {
@@ -27,17 +28,18 @@ export default function Table(config) {
     cols.push(columnHelper.display({
       id: 'actions',
       cell: (info) => (
-        <div className="normal-buttons">
+        <div className="normal-buttons" key={info.row.id}>
           {config.buttons.map((button, index) => {
             const IconComponent = IconMap[button.icon]
             const Wrapper = button.view ? "a" : React.Fragment;
-
+            const isDeleteButton = button.button_class == 'delete-btn';   
             return (
-              <Wrapper href={button.view?(button.view.url+'?'+button.view.name+'='+info.row.original[button.view.param]):undefined}>
+              <Wrapper key={index} href={button.view?(button.view.url+'?'+button.view.name+'='+info.row.original[button.view.param]):undefined}>
               <button
-                key={button.icon ?? index}
                 type="button"
-                className={`btn w-32-px h-32-px rounded-circle ${button.background_color_class} ${button.text_color_class} d-inline-flex align-items-center justify-content-center`}
+                className={`btn w-32-px h-32-px rounded-circle ${button.background_color_class} ${button.text_color_class} d-inline-flex align-items-center justify-content-center ${button.class ?? ''}`}
+                onClick={isDeleteButton ? () => handleDeleteClick(info.row.original) : undefined}
+                
               >
                 <IconComponent/>
               </button>
@@ -145,13 +147,20 @@ export default function Table(config) {
   };
 
   const handleDeleteClick = (row) => {
-    const warning = config.delete?.warning ?? '';
-    const matches = [...warning.matchAll(/\{(.*?)\}/g)];
-    const args = matches.map(match => match[1].trim());
-    let processedWarning = warning;
-    for (const arg of args) {
-      processedWarning = processedWarning.replace('{' + arg + '}', row[arg]);
+    let processedWarning = '';
+    if(config.delete?.warning == ''){
+      processedWarning = 'Seguro que quieres eliminar este registro?';
     }
+    else{
+      const warning = config.delete?.warning ?? '';
+      const matches = [...warning.matchAll(/\{(.*?)\}/g)];
+      const args = matches.map(match => match[1].trim());
+      processedWarning = warning;
+      for (const arg of args) {
+        processedWarning = processedWarning.replace('{' + arg + '}', row[arg]);
+      }
+    }
+    
     setDeletePopup({ show: true, warning: processedWarning, row });
   };
 
@@ -372,7 +381,25 @@ export default function Table(config) {
           
         </div>
       </div>
-      <div className="spacer-md" />
+      <Dialog 
+        isOpen={deletePopup.show} 
+        onClose={() => setDeletePopup({ show: false, warning: '', row: null })}
+        title="Confirmar eliminación"
+        actions={[
+           { 
+            label: 'Cancelar', 
+            onClick: () => setDeletePopup({ show: false, warning: '', row: null }),
+            className: 'btn-warning-600'
+          },
+          { 
+            label: 'Eliminar', 
+            onClick: () => handleConfirmDelete(),
+            className: 'btn-danger-600'
+          }
+        ]}
+      >
+        {deletePopup.warning}
+      </Dialog>
     </div>
   );
 };
