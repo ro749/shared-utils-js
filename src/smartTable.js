@@ -168,6 +168,9 @@ import $ from 'jquery';
                 serverSide: true,
                 order: options.order?[options.order]:[],
                 pageLength: options.page_length??10,
+                paging: options.page_length!=null,
+                info: options.page_length!=null,
+                searching: options.page_length!=null, 
                 language: options.texts,
                 deferLoading: options.autoload?null:0,
                 initComplete: function () {
