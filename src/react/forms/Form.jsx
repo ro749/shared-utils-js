@@ -1,42 +1,27 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import axios from 'axios';
 import FormField from './FormField';
 import Dialog from '../dialogs/Dialog';
-import { useForm } from '@tanstack/react-form'
-
-
+import { useForm, useSelector } from '@tanstack/react-form'
+import useRecordForm from './useRecordForm';
 export default function Form(config) {
-  const [showSuccessDialog, setShowSuccessDialog] = React.useState(false);
-  const form = useForm({
-    defaultValues: Object.fromEntries(
-      Object.keys(config.fields).map(key => [key, config.fields[key].type === 'image' ? null : ''])
-    ),
-    onSubmit: ({value,formApi}) => {
-      console.log(value);
-      axios.post(`/form/${config.id}`, value).
-      then(() => {
-        setShowSuccessDialog(true);
-        form.reset();
-      }).
-      catch((error) => {
-        const apiErrors = error.response.config.errors;
-        const fieldErrors = Object.fromEntries(
-          Object.entries(apiErrors).map(([field, messages]) => [field, messages])
-        );
-
-        formApi.setErrorMap({
-          onSubmit: {
-            fields: fieldErrors,
-            form: "Submission failed. Please correct the errors below."
-          }
-        });
-      });
+  
+  const inputRefs = useRef(new Set());
+  function setInputRef(ref) {
+    if (ref) {
+      inputRefs.current.add(ref);
     }
-  });
+  }
+  const reset = () => { 
+    inputRefs.current.forEach(input => input.reset?.());
+  };
+  const { form, showSuccessDialog, setShowSuccessDialog } = useRecordForm(config, undefined, reset);
+  const isDirty = useSelector(form.store, (state) => state.isDirty)
+
   return (
     <>
       <form 
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
           e.preventDefault()
           e.stopPropagation()
           form.handleSubmit()
@@ -52,6 +37,7 @@ export default function Form(config) {
                   field={config.fields[key]}
                   fieldName={key}
                   form_id={config.id}
+                  ref={setInputRef}
                 />
               ))}
             </div>
@@ -64,10 +50,14 @@ export default function Form(config) {
               field={config.fields[key]}
               fieldName={key}
               form_id={config.id}
+              ref={setInputRef}
             />
           ))
         )}
-        <button type="submit">{config.submit_text}</button>
+        <div style={{display: 'flex', justifyContent: 'center', flexDirection: 'row', gap: '6rem'}}>
+          {config.reset_text && isDirty && <button type="button" onClick={() => {form.reset(); reset();}}>{config.reset_text}</button>}
+          <button type="submit">{config.submit_text}</button>
+        </div>
       </form>
       <Dialog 
         isOpen={showSuccessDialog} 

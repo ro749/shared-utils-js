@@ -8,6 +8,7 @@ import PhoneInput from './PhoneInput';
 import MailInput from './MailInput';
 import Select from './Select';
 import ImageUploader from './ImageUploader';
+import FileUploader from './FileUploader';
 
 const INPUT_COMPONENTS = {
   text: Input,
@@ -21,18 +22,17 @@ const INPUT_COMPONENTS = {
   textarea: TextArea,
   selector: Select,
   selector_db: Select,
-  image: ImageUploader
+  image: ImageUploader,
+  file: FileUploader
 };
 
-const FormField = ({ form, field, fieldName, value, form_id, error, resetKey }) => {
+const FormField = ({ ref, form, field, fieldName, value, form_id, error, resetKey, preview_table }) => {
   const Component = INPUT_COMPONENTS[field.type];
-
+  
   return (
     <form.Field 
       name={fieldName}
       children={(fieldProps) => {
-        console.log('fieldProps.state.meta');
-        console.log(fieldProps.state.meta);
         return (
         <>
           <label>
@@ -48,6 +48,9 @@ const FormField = ({ form, field, fieldName, value, form_id, error, resetKey }) 
               imageUrl={field.imageUrl}
               resetKey={resetKey}
               value={fieldProps.state.value}
+              preview_table={field.preview_table}
+              public_key={field.public_key}
+              ref={ref}
             />
           </label>
           {fieldProps.state.meta.errors.length > 0 && (

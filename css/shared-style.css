@@ -63,11 +63,10 @@
     padding-top:0; 
     color:black !important;
 }
-.normal-buttons{
+.normal-buttons, .edit-buttons{
     display:flex;
     gap: 6px;
 }
-
 
 @media only screen and (min-width: 768px){
     .popup{

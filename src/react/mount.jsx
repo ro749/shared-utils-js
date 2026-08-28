@@ -8,7 +8,6 @@ const registry = {
 };
 
 export function mount(el, name, config) {
-  console.log(name);
   const Component = registry[name];
   const root = createRoot(el);
   root.render(<Component {...config} />);

@@ -13,7 +13,8 @@
   "description": "",
   "peerDependencies": {
     "@tanstack/react-form": "^1.33.5",
-    "react-select": "^5.0.0"
+    "react-select": "^5.0.0",
+    "papaparse": "^5.7.0"
   },
   "exports": {
     ".": "./src/index.js",
@@ -37,6 +38,7 @@
   "dependencies": {
     "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-table": "^9.1.2",
-    "axios": "^1.19.0"
+    "axios": "^1.19.0",
+    "papaparse": "^5.7.0"
   }
 }
