@@ -17,17 +17,14 @@
     "papaparse": "^5.7.0"
   },
   "exports": {
-    ".": "./src/index.js",
-    "./css/*": "./css/*",
-    "./react": {
-      "import": "./dist/react/index.mjs",
-      "require": "./dist/react/index.js"
-    }
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./css/*": "./css/*"
   },
   "devDependencies": {
-    "@iconify-json/iconamoon": "^1.2.2",
-    "@iconify-json/lucide": "^1.2.125",
-    "@iconify-json/mingcute": "^1.2.8",
+    
     "@svgr/core": "^8.1.0",
     "@svgr/plugin-jsx": "^8.1.0",
     "react-select": "^5.0.0",
@@ -39,6 +36,9 @@
     "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-table": "^9.1.2",
     "axios": "^1.19.0",
-    "papaparse": "^5.7.0"
+    "papaparse": "^5.7.0",
+    "@iconify-json/iconamoon": "^1.2.2",
+    "@iconify-json/lucide": "^1.2.125",
+    "@iconify-json/mingcute": "^1.2.8"
   }
 }
