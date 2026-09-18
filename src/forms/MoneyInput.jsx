@@ -9,7 +9,7 @@ const MoneyInput = ({value, field, onChange, ...props}) => {
     }, [value]);
 
     function format(value) {
-        Intl.NumberFormat('es-MX', {
+        return Intl.NumberFormat('es-MX', {
                 style: 'currency',
                 currency: 'MXN',
             }).format(value);

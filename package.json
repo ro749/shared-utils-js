@@ -13,8 +13,8 @@
   "description": "",
   "peerDependencies": {
     "@tanstack/react-form": "^1.33.5",
-    "react-select": "^5.0.0",
-    "papaparse": "^5.7.0"
+    "papaparse": "^5.7.0",
+    "react-select": "^5.0.0"
   },
   "exports": {
     ".": {
@@ -24,7 +24,6 @@
     "./css/*": "./css/*"
   },
   "devDependencies": {
-    
     "@svgr/core": "^8.1.0",
     "@svgr/plugin-jsx": "^8.1.0",
     "react-select": "^5.0.0",
@@ -33,12 +32,13 @@
     "unplugin-icons": "^23.0.1"
   },
   "dependencies": {
+    "@iconify-json/iconamoon": "^1.2.2",
+    "@iconify-json/lucide": "^1.2.125",
+    "@iconify-json/mingcute": "^1.2.8",
+    "@tanstack/charts": "^0.18.0",
     "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-table": "^9.1.2",
     "axios": "^1.19.0",
-    "papaparse": "^5.7.0",
-    "@iconify-json/iconamoon": "^1.2.2",
-    "@iconify-json/lucide": "^1.2.125",
-    "@iconify-json/mingcute": "^1.2.8"
+    "papaparse": "^5.7.0"
   }
 }

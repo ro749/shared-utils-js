@@ -10,3 +10,5 @@ export { default as useRecordForm } from './forms/useRecordForm';
 export { default as Dialog } from './dialogs/Dialog';
 export { default as Percent } from './fillers/Percent';
 export { default as Money } from './fillers/Money';
+export {default as Chart} from './charts/Chart';
+export {default as ChartType} from './charts/ChartType';
