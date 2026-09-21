@@ -5,6 +5,8 @@ const ChartType = Object.freeze({
   LINE: 'line',
   AREA: 'area',
   PIE: 'pie',
+  DONUT: 'donut',
+  RADIAL: 'radial',
   SCATTER: 'scatter',
 });
 
