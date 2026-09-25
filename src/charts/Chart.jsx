@@ -1,24 +1,26 @@
 import React from "react";
 import { scaleBand } from '@tanstack/charts/scales/band';
 import { scaleLinear } from '@tanstack/charts/scales/linear';
-import { barY, lineY, defineChart } from '@tanstack/charts';
+import { barY, areaY, lineY, defineChart } from '@tanstack/charts';
 import { pie, polar, radialArc, radialBarAngle } from '@tanstack/charts/polar';
 import { tooltip } from '@tanstack/charts/tooltip';
 import { Chart as TanstackChart } from '@tanstack/charts/react';
 import ChartType from './ChartType';
-const Chart = ({data, chartType}) => {
+const Chart = ({chart, type, guides=false, width, height, color, gradient}) => {
+    console.log(chart);
     var chartData = null;
-    switch (chartType) {
+    switch (type) {
         case ChartType.BAR:
-            chartData = barY(data, {
-                x: 'label',
-                y: 'value',
+            chartData = barY(chart.data, {
+                x: chart.label_column,
+                y: chart.data_column,
             });
             break;
         case ChartType.LINE:
-            chartData = lineY(data, {
-                x: 'label',
-                y: 'value',
+            chartData = lineY(chart.data, {
+              x: chart.label_column,
+              y: chart.data_column,
+              stroke: color,
             });
             break;
         case ChartType.PIE:
@@ -28,11 +30,11 @@ const Chart = ({data, chartType}) => {
                     radius: null,
                 },
                 marks: [
-                    radialArc(pie(data, {
-                        value: 'value',
+                    radialArc(pie(chart.data, {
+                        value: chart.data_column,
                         }),{
-                        key: 'label',
-                        color: 'label',
+                        key: chart.label_column,
+                        color: chart.label_column,
                     }),
                 ]
             });
@@ -44,18 +46,18 @@ const Chart = ({data, chartType}) => {
                     radius: null,
                 },
                 marks: [
-                    radialArc(pie(data, {
-                        value: 'value',
+                    radialArc(pie(chart.data, {
+                        value: chart.data_column,
                         }),{
-                        key: 'label',
-                        color: 'label',
+                        key: chart.label_column,
+                        color: chart.label_column,
                         innerRadius: ({ radius }) => radius * 0.58,
                     }),
                 ]
             });
             break;
           case ChartType.RADIAL:
-            const maxData = Math.max(...data.map((d) => d.value));
+            const maxData = Math.max(...chart.data.map((d) => d[chart.data_column]));
             console.log(maxData);
             chartData = polar({
                 scales: {
@@ -71,15 +73,15 @@ const Chart = ({data, chartType}) => {
                     ],
                   },
                 },
-                
+
                 marks: [
                     radialBarAngle(
-                      data,
+                      chart.data,
                       {
-                        angle: 'value',
-                        radius: 'label',
-                        key: 'label',
-                        color: 'label',
+                        angle: chart.data_column,
+                        radius: chart.label_column,
+                        key: chart.label_column,
+                        color: chart.label_column,
                         cornerRadius: 'full'
                       }
                     ),
@@ -88,11 +90,32 @@ const Chart = ({data, chartType}) => {
             break;
         default:
             chartData = null;
-    }
-  const chart = defineChart({
-  marks: [
-    chartData
-  ],
+  }
+  var marks = [chartData];
+  var gradients = [];
+  if (gradient) {
+    marks.push(areaY(chart.data, {
+      x: chart.label_column,
+      y: chart.data_column,
+      stroke: color,
+    }));
+    //gradients = [
+    //  {
+    //    id: 'themed-area-fill',
+    //    x1: 0,
+    //    y1: 0,
+    //    x2: 0,
+    //    y2: 1,
+    //    stops: [
+    //      { offset: 0, color: accent, opacity: 0.34 },
+    //      { offset: 0.58, color: accent, opacity: 0.13 },
+    //      { offset: 1, color: accent, opacity: 0.015 },
+    //    ],
+    //  },
+    //];
+  }
+  const chartDef = defineChart({
+  marks: marks,
   scales: {
     x: {
       scale: () => scaleBand().padding(0.18),
@@ -107,15 +130,17 @@ const Chart = ({data, chartType}) => {
       },
     },
   },
-
+  guides: guides,
+  gradients: gradients,
   tooltip,
 })
 
   return (
     <TanstackChart
-      definition={chart}
-      height={320}
-      ariaLabel="English letter frequencies"
+      definition={chartDef}
+      width={width}
+      height={height}
+      ariaLabel=""
     />
   );
 };

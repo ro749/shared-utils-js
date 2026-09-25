@@ -29,6 +29,8 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/index.jsx
 var src_exports = {};
 __export(src_exports, {
+  Chart: () => Chart_default,
+  ChartType: () => ChartType_default,
   Dialog: () => Dialog_default,
   Form: () => Form,
   ImageUploader: () => ImageUploader_default,
@@ -38,6 +40,8 @@ __export(src_exports, {
   Percent: () => Percent_default,
   PercentInput: () => PercentInput_default,
   Table: () => Table,
+  configureEnums: () => configureEnums,
+  getEnum: () => getEnum,
   mountForm: () => mountForm,
   mountTable: () => mountTable,
   useRecordForm: () => useRecordForm_default
@@ -90,7 +94,7 @@ var MoneyInput = ({ value, field, onChange, ...props }) => {
     ref.current.setSelectionRange(cursorRef.current, cursorRef.current);
   }, [value]);
   function format(value2) {
-    Intl.NumberFormat("es-MX", {
+    return Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN"
     }).format(value2);
@@ -623,16 +627,38 @@ function EditableTableRow({ row, columns, formConfig, onCancel, onSaved }) {
   ))));
 }
 
+// src/EnumManager.jsx
+function configureEnums(enums) {
+  window.enums = enums;
+}
+function getEnum(enumName, enumValue) {
+  return window.enums[enumName][enumValue];
+}
+
 // src/tables/Table.jsx
 function Table({ ref, ...config }) {
+  var _a;
   const columnHelper = (0, import_react_table.createColumnHelper)();
   var cols = [];
   for (let key in config.columns) {
+    const columnConfig = config.columns[key];
+    var modifier = (data2) => data2.getValue();
+    switch (columnConfig.modifier) {
+      case "money":
+        modifier = (data2) => Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(data2.getValue());
+        break;
+    }
+    if (((_a = columnConfig.logic_modifier) == null ? void 0 : _a.type) == "options") {
+      modifier = (data2) => {
+        return /* @__PURE__ */ import_react21.default.createElement("div", { className: columnConfig.logic_modifier.options + "-" + data2.getValue() }, getEnum(columnConfig.logic_modifier.options, data2.getValue()));
+      };
+    }
     cols.push(
       columnHelper.accessor(
         key,
         {
-          header: config.columns[key].display
+          header: config.columns[key].display,
+          cell: modifier
         }
       )
     );
@@ -742,9 +768,9 @@ function Table({ ref, ...config }) {
     });
   };
   const handleDeleteClick = (row) => {
-    var _a, _b;
+    var _a2, _b;
     let processedWarning = "";
-    if (((_a = config.delete) == null ? void 0 : _a.warning) == "") {
+    if (((_a2 = config.delete) == null ? void 0 : _a2.warning) == "") {
       processedWarning = "Seguro que quieres eliminar este registro?";
     } else {
       const warning = ((_b = config.delete) == null ? void 0 : _b.warning) ?? "";
@@ -758,10 +784,10 @@ function Table({ ref, ...config }) {
     setDeletePopup({ show: true, warning: processedWarning, row });
   };
   const handleConfirmDelete = () => {
-    var _a;
+    var _a2;
     const formData = new FormData();
     formData.append("id", deletePopup.row.id);
-    formData.append("_token", ((_a = document.querySelector('meta[name="csrf-token"]')) == null ? void 0 : _a.getAttribute("content")) ?? "");
+    formData.append("_token", ((_a2 = document.querySelector('meta[name="csrf-token"]')) == null ? void 0 : _a2.getAttribute("content")) ?? "");
     Object.entries(activeFilters).forEach(([key, value]) => {
       formData.append(`filters[${key}]`, value);
     });
@@ -799,7 +825,6 @@ function Table({ ref, ...config }) {
     setData(updatedData);
   };
   const reset = () => {
-    console.log("reset D");
     setResetSignal((prev) => !prev);
   };
   (0, import_react21.useImperativeHandle)(ref, () => ({
@@ -1154,8 +1179,157 @@ var Money = ({ value }) => {
   }).format(value));
 };
 var Money_default = Money;
+
+// src/charts/Chart.jsx
+var import_react30 = __toESM(require("react"));
+var import_band = require("@tanstack/charts/scales/band");
+var import_linear = require("@tanstack/charts/scales/linear");
+var import_charts = require("@tanstack/charts");
+var import_polar = require("@tanstack/charts/polar");
+var import_tooltip = require("@tanstack/charts/tooltip");
+var import_react31 = require("@tanstack/charts/react");
+
+// src/charts/ChartType.jsx
+var import_react29 = __toESM(require("react"));
+var ChartType = Object.freeze({
+  BAR: "bar",
+  LINE: "line",
+  AREA: "area",
+  PIE: "pie",
+  DONUT: "donut",
+  RADIAL: "radial",
+  SCATTER: "scatter"
+});
+var ChartType_default = ChartType;
+
+// src/charts/Chart.jsx
+var Chart = ({ chart, type, guides = false, width, height, color, gradient }) => {
+  console.log(chart);
+  var chartData = null;
+  switch (type) {
+    case ChartType_default.BAR:
+      chartData = (0, import_charts.barY)(chart.data, {
+        x: chart.label_column,
+        y: chart.data_column
+      });
+      break;
+    case ChartType_default.LINE:
+      chartData = (0, import_charts.lineY)(chart.data, {
+        x: chart.label_column,
+        y: chart.data_column,
+        stroke: color
+      });
+      break;
+    case ChartType_default.PIE:
+      chartData = (0, import_polar.polar)({
+        scales: {
+          angle: null,
+          radius: null
+        },
+        marks: [
+          (0, import_polar.radialArc)((0, import_polar.pie)(chart.data, {
+            value: chart.data_column
+          }), {
+            key: chart.label_column,
+            color: chart.label_column
+          })
+        ]
+      });
+      break;
+    case ChartType_default.DONUT:
+      chartData = (0, import_polar.polar)({
+        scales: {
+          angle: null,
+          radius: null
+        },
+        marks: [
+          (0, import_polar.radialArc)((0, import_polar.pie)(chart.data, {
+            value: chart.data_column
+          }), {
+            key: chart.label_column,
+            color: chart.label_column,
+            innerRadius: ({ radius }) => radius * 0.58
+          })
+        ]
+      });
+      break;
+    case ChartType_default.RADIAL:
+      const maxData = Math.max(...chart.data.map((d) => d[chart.data_column]));
+      console.log(maxData);
+      chartData = (0, import_polar.polar)({
+        scales: {
+          angle: {
+            scale: (0, import_linear.scaleLinear)().domain([0, maxData])
+          },
+          radius: {
+            scale: () => (0, import_band.scaleBand)().paddingInner(0.38).paddingOuter(0.19),
+            range: [
+              ({ radius }) => radius * 0.2,
+              ({ radius }) => radius
+            ]
+          }
+        },
+        marks: [
+          (0, import_polar.radialBarAngle)(
+            chart.data,
+            {
+              angle: chart.data_column,
+              radius: chart.label_column,
+              key: chart.label_column,
+              color: chart.label_column,
+              cornerRadius: "full"
+            }
+          )
+        ]
+      });
+      break;
+    default:
+      chartData = null;
+  }
+  var marks = [chartData];
+  var gradients = [];
+  if (gradient) {
+    marks.push((0, import_charts.areaY)(chart.data, {
+      x: chart.label_column,
+      y: chart.data_column,
+      stroke: color
+    }));
+  }
+  const chartDef = (0, import_charts.defineChart)({
+    marks,
+    scales: {
+      x: {
+        scale: () => (0, import_band.scaleBand)().padding(0.18)
+      },
+      y: {
+        scale: import_linear.scaleLinear,
+        nice: true,
+        grid: true,
+        axis: {
+          label: "Frequency",
+          ticks: { format: (value) => value + "%" }
+        }
+      }
+    },
+    guides,
+    gradients,
+    tooltip: import_tooltip.tooltip
+  });
+  return /* @__PURE__ */ import_react30.default.createElement(
+    import_react31.Chart,
+    {
+      definition: chartDef,
+      width,
+      height,
+      ariaLabel: ""
+    }
+  );
+};
+var Chart_default = Chart;
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  Chart,
+  ChartType,
   Dialog,
   Form,
   ImageUploader,
@@ -1165,6 +1339,8 @@ var Money_default = Money;
   Percent,
   PercentInput,
   Table,
+  configureEnums,
+  getEnum,
   mountForm,
   mountTable,
   useRecordForm

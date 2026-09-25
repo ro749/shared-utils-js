@@ -11,17 +11,32 @@ import IconMap from '../icons/IconMap.jsx';
 import Dialog from '../dialogs/Dialog';
 import Form from '../forms/Form.jsx';
 import EditableTableRow from './EditableTableRow.jsx';
-
+import { getEnum } from '../EnumManager';
 export default function Table({ref, ...config}) {
   
   const columnHelper = createColumnHelper();
   var cols = [];
   for(let key in config.columns){ 
+    const columnConfig = config.columns[key];
+    var modifier = (data) => data.getValue();
+    switch(columnConfig.modifier){
+      case 'money':
+        modifier = (data) => Intl.NumberFormat('es-MX', {style: 'currency',currency: 'MXN',}).format(data.getValue());
+        break;
+    }
+    if(columnConfig.logic_modifier?.type == 'options'){
+      modifier = (data) => {
+        return <div className={columnConfig.logic_modifier.options+"-"+data.getValue()}>
+          {getEnum(columnConfig.logic_modifier.options, data.getValue())}
+          </div>;
+      };
+    }
     cols.push(
       columnHelper.accessor(
         key,
         {
           header: config.columns[key].display,
+          cell: modifier,
         }
       )
     );
@@ -218,7 +233,6 @@ export default function Table({ref, ...config}) {
   }
 
   const reset = () => {
-    console.log('reset D');
     setResetSignal((prev) => !prev);
   }
 

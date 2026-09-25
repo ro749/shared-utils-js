@@ -44,7 +44,7 @@ var MoneyInput = ({ value, field, onChange, ...props }) => {
     ref.current.setSelectionRange(cursorRef.current, cursorRef.current);
   }, [value]);
   function format(value2) {
-    Intl.NumberFormat("es-MX", {
+    return Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN"
     }).format(value2);
@@ -584,16 +584,38 @@ function EditableTableRow({ row, columns, formConfig, onCancel, onSaved }) {
   ))));
 }
 
+// src/EnumManager.jsx
+function configureEnums(enums) {
+  window.enums = enums;
+}
+function getEnum(enumName, enumValue) {
+  return window.enums[enumName][enumValue];
+}
+
 // src/tables/Table.jsx
 function Table({ ref, ...config }) {
+  var _a;
   const columnHelper = createColumnHelper();
   var cols = [];
   for (let key in config.columns) {
+    const columnConfig = config.columns[key];
+    var modifier = (data2) => data2.getValue();
+    switch (columnConfig.modifier) {
+      case "money":
+        modifier = (data2) => Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(data2.getValue());
+        break;
+    }
+    if (((_a = columnConfig.logic_modifier) == null ? void 0 : _a.type) == "options") {
+      modifier = (data2) => {
+        return /* @__PURE__ */ React20.createElement("div", { className: columnConfig.logic_modifier.options + "-" + data2.getValue() }, getEnum(columnConfig.logic_modifier.options, data2.getValue()));
+      };
+    }
     cols.push(
       columnHelper.accessor(
         key,
         {
-          header: config.columns[key].display
+          header: config.columns[key].display,
+          cell: modifier
         }
       )
     );
@@ -703,9 +725,9 @@ function Table({ ref, ...config }) {
     });
   };
   const handleDeleteClick = (row) => {
-    var _a, _b;
+    var _a2, _b;
     let processedWarning = "";
-    if (((_a = config.delete) == null ? void 0 : _a.warning) == "") {
+    if (((_a2 = config.delete) == null ? void 0 : _a2.warning) == "") {
       processedWarning = "Seguro que quieres eliminar este registro?";
     } else {
       const warning = ((_b = config.delete) == null ? void 0 : _b.warning) ?? "";
@@ -719,10 +741,10 @@ function Table({ ref, ...config }) {
     setDeletePopup({ show: true, warning: processedWarning, row });
   };
   const handleConfirmDelete = () => {
-    var _a;
+    var _a2;
     const formData = new FormData();
     formData.append("id", deletePopup.row.id);
-    formData.append("_token", ((_a = document.querySelector('meta[name="csrf-token"]')) == null ? void 0 : _a.getAttribute("content")) ?? "");
+    formData.append("_token", ((_a2 = document.querySelector('meta[name="csrf-token"]')) == null ? void 0 : _a2.getAttribute("content")) ?? "");
     Object.entries(activeFilters).forEach(([key, value]) => {
       formData.append(`filters[${key}]`, value);
     });
@@ -760,7 +782,6 @@ function Table({ ref, ...config }) {
     setData(updatedData);
   };
   const reset = () => {
-    console.log("reset D");
     setResetSignal((prev) => !prev);
   };
   useImperativeHandle(ref, () => ({
@@ -1115,7 +1136,156 @@ var Money = ({ value }) => {
   }).format(value));
 };
 var Money_default = Money;
+
+// src/charts/Chart.jsx
+import React29 from "react";
+import { scaleBand } from "@tanstack/charts/scales/band";
+import { scaleLinear } from "@tanstack/charts/scales/linear";
+import { barY, areaY, lineY, defineChart } from "@tanstack/charts";
+import { pie, polar, radialArc, radialBarAngle } from "@tanstack/charts/polar";
+import { tooltip } from "@tanstack/charts/tooltip";
+import { Chart as TanstackChart } from "@tanstack/charts/react";
+
+// src/charts/ChartType.jsx
+import React28 from "react";
+var ChartType = Object.freeze({
+  BAR: "bar",
+  LINE: "line",
+  AREA: "area",
+  PIE: "pie",
+  DONUT: "donut",
+  RADIAL: "radial",
+  SCATTER: "scatter"
+});
+var ChartType_default = ChartType;
+
+// src/charts/Chart.jsx
+var Chart = ({ chart, type, guides = false, width, height, color, gradient }) => {
+  console.log(chart);
+  var chartData = null;
+  switch (type) {
+    case ChartType_default.BAR:
+      chartData = barY(chart.data, {
+        x: chart.label_column,
+        y: chart.data_column
+      });
+      break;
+    case ChartType_default.LINE:
+      chartData = lineY(chart.data, {
+        x: chart.label_column,
+        y: chart.data_column,
+        stroke: color
+      });
+      break;
+    case ChartType_default.PIE:
+      chartData = polar({
+        scales: {
+          angle: null,
+          radius: null
+        },
+        marks: [
+          radialArc(pie(chart.data, {
+            value: chart.data_column
+          }), {
+            key: chart.label_column,
+            color: chart.label_column
+          })
+        ]
+      });
+      break;
+    case ChartType_default.DONUT:
+      chartData = polar({
+        scales: {
+          angle: null,
+          radius: null
+        },
+        marks: [
+          radialArc(pie(chart.data, {
+            value: chart.data_column
+          }), {
+            key: chart.label_column,
+            color: chart.label_column,
+            innerRadius: ({ radius }) => radius * 0.58
+          })
+        ]
+      });
+      break;
+    case ChartType_default.RADIAL:
+      const maxData = Math.max(...chart.data.map((d) => d[chart.data_column]));
+      console.log(maxData);
+      chartData = polar({
+        scales: {
+          angle: {
+            scale: scaleLinear().domain([0, maxData])
+          },
+          radius: {
+            scale: () => scaleBand().paddingInner(0.38).paddingOuter(0.19),
+            range: [
+              ({ radius }) => radius * 0.2,
+              ({ radius }) => radius
+            ]
+          }
+        },
+        marks: [
+          radialBarAngle(
+            chart.data,
+            {
+              angle: chart.data_column,
+              radius: chart.label_column,
+              key: chart.label_column,
+              color: chart.label_column,
+              cornerRadius: "full"
+            }
+          )
+        ]
+      });
+      break;
+    default:
+      chartData = null;
+  }
+  var marks = [chartData];
+  var gradients = [];
+  if (gradient) {
+    marks.push(areaY(chart.data, {
+      x: chart.label_column,
+      y: chart.data_column,
+      stroke: color
+    }));
+  }
+  const chartDef = defineChart({
+    marks,
+    scales: {
+      x: {
+        scale: () => scaleBand().padding(0.18)
+      },
+      y: {
+        scale: scaleLinear,
+        nice: true,
+        grid: true,
+        axis: {
+          label: "Frequency",
+          ticks: { format: (value) => value + "%" }
+        }
+      }
+    },
+    guides,
+    gradients,
+    tooltip
+  });
+  return /* @__PURE__ */ React29.createElement(
+    TanstackChart,
+    {
+      definition: chartDef,
+      width,
+      height,
+      ariaLabel: ""
+    }
+  );
+};
+var Chart_default = Chart;
 export {
+  Chart_default as Chart,
+  ChartType_default as ChartType,
   Dialog_default as Dialog,
   Form,
   ImageUploader_default as ImageUploader,
@@ -1125,6 +1295,8 @@ export {
   Percent_default as Percent,
   PercentInput_default as PercentInput,
   Table,
+  configureEnums,
+  getEnum,
   mountForm,
   mountTable,
   useRecordForm_default as useRecordForm
