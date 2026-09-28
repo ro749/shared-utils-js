@@ -1289,11 +1289,26 @@ var Chart = ({ chart, type, guides = false, width, height, color, gradient }) =>
   var marks = [chartData];
   var gradients = [];
   if (gradient) {
+    console.log("gradient");
     marks.push((0, import_charts.areaY)(chart.data, {
       x: chart.label_column,
       y: chart.data_column,
-      stroke: color
+      fill: "url(#themed-area-fill)"
     }));
+    gradients = [
+      {
+        id: "themed-area-fill",
+        x1: 0,
+        y1: 0,
+        x2: 0,
+        y2: 1,
+        stops: [
+          { offset: 0, color: color || "#2563eb", opacity: 1 },
+          { offset: 0.58, color: color || "#2563eb", opacity: 0.9 },
+          { offset: 1, color: color || "#2563eb", opacity: 0.8 }
+        ]
+      }
+    ];
   }
   const chartDef = (0, import_charts.defineChart)({
     marks,
