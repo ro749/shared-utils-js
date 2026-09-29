@@ -30,6 +30,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var src_exports = {};
 __export(src_exports, {
   Chart: () => Chart_default,
+  ChartGuides: () => ChartGuides_default,
   ChartType: () => ChartType_default,
   Dialog: () => Dialog_default,
   Form: () => Form,
@@ -1181,13 +1182,13 @@ var Money = ({ value }) => {
 var Money_default = Money;
 
 // src/charts/Chart.jsx
-var import_react30 = __toESM(require("react"));
+var import_react31 = __toESM(require("react"));
 var import_band = require("@tanstack/charts/scales/band");
 var import_linear = require("@tanstack/charts/scales/linear");
 var import_charts = require("@tanstack/charts");
 var import_polar = require("@tanstack/charts/polar");
 var import_tooltip = require("@tanstack/charts/tooltip");
-var import_react31 = require("@tanstack/charts/react");
+var import_react32 = require("@tanstack/charts/react");
 
 // src/charts/ChartType.jsx
 var import_react29 = __toESM(require("react"));
@@ -1202,8 +1203,17 @@ var ChartType = Object.freeze({
 });
 var ChartType_default = ChartType;
 
+// src/charts/ChartGuides.jsx
+var import_react30 = __toESM(require("react"));
+var ChartGuides = Object.freeze({
+  NONE: "none",
+  XAXIS: "xaxis",
+  FULL: "full"
+});
+var ChartGuides_default = ChartGuides;
+
 // src/charts/Chart.jsx
-var Chart = ({ chart, type, guides = false, width, height, color, gradient }) => {
+var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, color, gradient }) => {
   console.log(chart);
   var chartData = null;
   switch (type) {
@@ -1288,6 +1298,13 @@ var Chart = ({ chart, type, guides = false, width, height, color, gradient }) =>
   }
   var marks = [chartData];
   var gradients = [];
+  var yaxis = {
+    line: guides == ChartGuides_default.FULL,
+    tickLabels: guides == ChartGuides_default.FULL,
+    ticks: {
+      size: 0
+    }
+  };
   if (gradient) {
     console.log("gradient");
     marks.push((0, import_charts.areaY)(chart.data, {
@@ -1304,8 +1321,8 @@ var Chart = ({ chart, type, guides = false, width, height, color, gradient }) =>
         y2: 1,
         stops: [
           { offset: 0, color: color || "#2563eb", opacity: 1 },
-          { offset: 0.58, color: color || "#2563eb", opacity: 0.9 },
-          { offset: 1, color: color || "#2563eb", opacity: 0.8 }
+          { offset: 0.58, color: color || "#2563eb", opacity: 0.5 },
+          { offset: 1, color: color || "#2563eb", opacity: 0 }
         ]
       }
     ];
@@ -1318,20 +1335,15 @@ var Chart = ({ chart, type, guides = false, width, height, color, gradient }) =>
       },
       y: {
         scale: import_linear.scaleLinear,
-        nice: true,
-        grid: true,
-        axis: {
-          label: "Frequency",
-          ticks: { format: (value) => value + "%" }
-        }
+        axis: yaxis
       }
     },
-    guides,
+    guides: guides != ChartGuides_default.NONE,
     gradients,
     tooltip: import_tooltip.tooltip
   });
-  return /* @__PURE__ */ import_react30.default.createElement(
-    import_react31.Chart,
+  return /* @__PURE__ */ import_react31.default.createElement(
+    import_react32.Chart,
     {
       definition: chartDef,
       width,
@@ -1344,6 +1356,7 @@ var Chart_default = Chart;
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   Chart,
+  ChartGuides,
   ChartType,
   Dialog,
   Form,

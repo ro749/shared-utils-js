@@ -1138,7 +1138,7 @@ var Money = ({ value }) => {
 var Money_default = Money;
 
 // src/charts/Chart.jsx
-import React29 from "react";
+import React30 from "react";
 import { scaleBand } from "@tanstack/charts/scales/band";
 import { scaleLinear } from "@tanstack/charts/scales/linear";
 import { barY, areaY, lineY, defineChart } from "@tanstack/charts";
@@ -1159,8 +1159,17 @@ var ChartType = Object.freeze({
 });
 var ChartType_default = ChartType;
 
+// src/charts/ChartGuides.jsx
+import React29 from "react";
+var ChartGuides = Object.freeze({
+  NONE: "none",
+  XAXIS: "xaxis",
+  FULL: "full"
+});
+var ChartGuides_default = ChartGuides;
+
 // src/charts/Chart.jsx
-var Chart = ({ chart, type, guides = false, width, height, color, gradient }) => {
+var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, color, gradient }) => {
   console.log(chart);
   var chartData = null;
   switch (type) {
@@ -1245,6 +1254,13 @@ var Chart = ({ chart, type, guides = false, width, height, color, gradient }) =>
   }
   var marks = [chartData];
   var gradients = [];
+  var yaxis = {
+    line: guides == ChartGuides_default.FULL,
+    tickLabels: guides == ChartGuides_default.FULL,
+    ticks: {
+      size: 0
+    }
+  };
   if (gradient) {
     console.log("gradient");
     marks.push(areaY(chart.data, {
@@ -1261,8 +1277,8 @@ var Chart = ({ chart, type, guides = false, width, height, color, gradient }) =>
         y2: 1,
         stops: [
           { offset: 0, color: color || "#2563eb", opacity: 1 },
-          { offset: 0.58, color: color || "#2563eb", opacity: 0.9 },
-          { offset: 1, color: color || "#2563eb", opacity: 0.8 }
+          { offset: 0.58, color: color || "#2563eb", opacity: 0.5 },
+          { offset: 1, color: color || "#2563eb", opacity: 0 }
         ]
       }
     ];
@@ -1275,19 +1291,14 @@ var Chart = ({ chart, type, guides = false, width, height, color, gradient }) =>
       },
       y: {
         scale: scaleLinear,
-        nice: true,
-        grid: true,
-        axis: {
-          label: "Frequency",
-          ticks: { format: (value) => value + "%" }
-        }
+        axis: yaxis
       }
     },
-    guides,
+    guides: guides != ChartGuides_default.NONE,
     gradients,
     tooltip
   });
-  return /* @__PURE__ */ React29.createElement(
+  return /* @__PURE__ */ React30.createElement(
     TanstackChart,
     {
       definition: chartDef,
@@ -1300,6 +1311,7 @@ var Chart = ({ chart, type, guides = false, width, height, color, gradient }) =>
 var Chart_default = Chart;
 export {
   Chart_default as Chart,
+  ChartGuides_default as ChartGuides,
   ChartType_default as ChartType,
   Dialog_default as Dialog,
   Form,

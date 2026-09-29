@@ -6,7 +6,8 @@ import { pie, polar, radialArc, radialBarAngle } from '@tanstack/charts/polar';
 import { tooltip } from '@tanstack/charts/tooltip';
 import { Chart as TanstackChart } from '@tanstack/charts/react';
 import ChartType from './ChartType';
-const Chart = ({chart, type, guides=false, width, height, color, gradient}) => {
+import ChartGuides from "./ChartGuides";
+const Chart = ({chart, type, guides=ChartGuides.NONE, width, height, color, gradient}) => {
     console.log(chart);
     var chartData = null;
     switch (type) {
@@ -93,6 +94,13 @@ const Chart = ({chart, type, guides=false, width, height, color, gradient}) => {
   }
   var marks = [chartData];
   var gradients = [];
+  var yaxis = {
+    line: guides == ChartGuides.FULL,
+    tickLabels: guides == ChartGuides.FULL,
+    ticks: {
+      size: 0,
+    },
+  };
   if (gradient) {
     console.log('gradient');
     marks.push(areaY(chart.data, {
@@ -109,8 +117,8 @@ const Chart = ({chart, type, guides=false, width, height, color, gradient}) => {
         y2: 1,
         stops: [
           { offset: 0, color: color || '#2563eb', opacity: 1},
-          { offset: 0.58, color: color || '#2563eb', opacity: .9 },
-          { offset: 1, color: color || '#2563eb', opacity: 0.8 },
+          { offset: 0.58, color: color || '#2563eb', opacity: 0.5 },
+          { offset: 1, color: color || '#2563eb', opacity: 0.0 },
         ],
       },
     ];
@@ -123,15 +131,10 @@ const Chart = ({chart, type, guides=false, width, height, color, gradient}) => {
     },
     y: {
       scale: scaleLinear,
-      nice: true,
-      grid: true,
-      axis: {
-        label: 'Frequency',
-        ticks: { format: (value) => value + '%' },
-      },
+      axis: yaxis
     },
   },
-  guides: guides,
+  guides: guides != ChartGuides.NONE,
   gradients: gradients,
   tooltip,
 })
