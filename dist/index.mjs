@@ -1169,25 +1169,24 @@ var ChartGuides = Object.freeze({
 var ChartGuides_default = ChartGuides;
 
 // src/charts/Chart.jsx
-var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, color, gradient }) => {
-  console.log(chart);
-  var chartData = null;
+var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, size = 1, color, gradient }) => {
+  var chartData = [];
   switch (type) {
     case ChartType_default.BAR:
-      chartData = barY(chart.data, {
+      chartData.push(barY(chart.data, {
         x: chart.label_column,
         y: chart.data_column
-      });
+      }));
       break;
     case ChartType_default.LINE:
-      chartData = lineY(chart.data, {
+      chartData.push(lineY(chart.data, {
         x: chart.label_column,
         y: chart.data_column,
         stroke: color
-      });
+      }));
       break;
     case ChartType_default.PIE:
-      chartData = polar({
+      chartData.push(polar({
         scales: {
           angle: null,
           radius: null
@@ -1200,10 +1199,10 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, co
             color: chart.label_column
           })
         ]
-      });
+      }));
       break;
     case ChartType_default.DONUT:
-      chartData = polar({
+      chartData.push(polar({
         scales: {
           angle: null,
           radius: null
@@ -1217,12 +1216,16 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, co
             innerRadius: ({ radius }) => radius * 0.58
           })
         ]
-      });
+      }));
       break;
     case ChartType_default.RADIAL:
       const maxData = Math.max(...chart.data.map((d) => d[chart.data_column]));
-      console.log(maxData);
-      chartData = polar({
+      var backgrounData = JSON.parse(JSON.stringify(chart.data));
+      for (var i = 0; i < backgrounData.length; i++) {
+        backgrounData[i][chart.data_column] = maxData;
+      }
+      chartData.push(polar({
+        radiusRatio: size,
         scales: {
           angle: {
             scale: scaleLinear().domain([0, maxData])
@@ -1237,6 +1240,16 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, co
         },
         marks: [
           radialBarAngle(
+            backgrounData,
+            {
+              angle: chart.data_column,
+              radius: chart.label_column,
+              key: chart.label_column,
+              fill: "#f4f4f4",
+              cornerRadius: "full"
+            }
+          ),
+          radialBarAngle(
             chart.data,
             {
               angle: chart.data_column,
@@ -1247,12 +1260,11 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, co
             }
           )
         ]
-      });
+      }));
       break;
     default:
       chartData = null;
   }
-  var marks = [chartData];
   var gradients = [];
   var yaxis = {
     line: guides == ChartGuides_default.FULL,
@@ -1262,8 +1274,7 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, co
     }
   };
   if (gradient) {
-    console.log("gradient");
-    marks.push(areaY(chart.data, {
+    chartData.push(areaY(chart.data, {
       x: chart.label_column,
       y: chart.data_column,
       fill: "url(#themed-area-fill)"
@@ -1284,7 +1295,7 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, co
     ];
   }
   const chartDef = defineChart({
-    marks,
+    marks: chartData,
     scales: {
       x: {
         scale: () => scaleBand().padding(0.18)
@@ -1309,10 +1320,16 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, co
   );
 };
 var Chart_default = Chart;
+
+// src/Colors.jsx
+import React31 from "react";
+var Colors = ["#2563eb", "#f97316", "#10b981", "#8b5cf6", "#ec4899", "#06b6d4"];
+var Colors_default = Colors;
 export {
   Chart_default as Chart,
   ChartGuides_default as ChartGuides,
   ChartType_default as ChartType,
+  Colors_default as Colors,
   Dialog_default as Dialog,
   Form,
   ImageUploader_default as ImageUploader,

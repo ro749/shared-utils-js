@@ -14,3 +14,4 @@ export {default as Chart} from './charts/Chart';
 export { default as ChartType } from './charts/ChartType';
 export { default as ChartGuides } from './charts/ChartGuides';
 export {configureEnums, getEnum} from './EnumManager';
+export { default as Colors } from './Colors';

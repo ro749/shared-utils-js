@@ -7,25 +7,24 @@ import { tooltip } from '@tanstack/charts/tooltip';
 import { Chart as TanstackChart } from '@tanstack/charts/react';
 import ChartType from './ChartType';
 import ChartGuides from "./ChartGuides";
-const Chart = ({chart, type, guides=ChartGuides.NONE, width, height, color, gradient}) => {
-    console.log(chart);
-    var chartData = null;
+const Chart = ({ chart, type, guides=ChartGuides.NONE, width, height, size=1, color, gradient}) => {
+    var chartData = [];
     switch (type) {
         case ChartType.BAR:
-            chartData = barY(chart.data, {
+            chartData.push(barY(chart.data, {
                 x: chart.label_column,
                 y: chart.data_column,
-            });
+            }));
             break;
         case ChartType.LINE:
-            chartData = lineY(chart.data, {
+            chartData.push(lineY(chart.data, {
               x: chart.label_column,
               y: chart.data_column,
               stroke: color,
-            });
+            }));
             break;
         case ChartType.PIE:
-            chartData = polar({
+            chartData.push(polar({
                 scales: {
                     angle: null,
                     radius: null,
@@ -38,10 +37,10 @@ const Chart = ({chart, type, guides=ChartGuides.NONE, width, height, color, grad
                         color: chart.label_column,
                     }),
                 ]
-            });
+            }));
             break;
           case ChartType.DONUT:
-            chartData = polar({
+            chartData.push(polar({
                 scales: {
                     angle: null,
                     radius: null,
@@ -55,12 +54,16 @@ const Chart = ({chart, type, guides=ChartGuides.NONE, width, height, color, grad
                         innerRadius: ({ radius }) => radius * 0.58,
                     }),
                 ]
-            });
+            }));
             break;
           case ChartType.RADIAL:
-            const maxData = Math.max(...chart.data.map((d) => d[chart.data_column]));
-            console.log(maxData);
-            chartData = polar({
+        const maxData = Math.max(...chart.data.map((d) => d[chart.data_column]));
+        var backgrounData = JSON.parse(JSON.stringify(chart.data));
+        for (var i = 0; i < backgrounData.length; i++){
+          backgrounData[i][chart.data_column] = maxData;
+        }
+        chartData.push(polar({
+          radiusRatio: size,
                 scales: {
                   angle: {
                     scale: scaleLinear().domain([0, maxData]),
@@ -74,8 +77,17 @@ const Chart = ({chart, type, guides=ChartGuides.NONE, width, height, color, grad
                     ],
                   },
                 },
-
-                marks: [
+          marks: [
+            radialBarAngle(
+              backgrounData,
+              {
+                angle: chart.data_column,
+                radius: chart.label_column,
+                key: chart.label_column,
+                fill: '#f4f4f4',
+                cornerRadius: 'full'
+              }
+            ),
                     radialBarAngle(
                       chart.data,
                       {
@@ -87,12 +99,11 @@ const Chart = ({chart, type, guides=ChartGuides.NONE, width, height, color, grad
                       }
                     ),
                 ]
-            });
-            break;
+            }));
+        break;
         default:
             chartData = null;
   }
-  var marks = [chartData];
   var gradients = [];
   var yaxis = {
     line: guides == ChartGuides.FULL,
@@ -102,8 +113,7 @@ const Chart = ({chart, type, guides=ChartGuides.NONE, width, height, color, grad
     },
   };
   if (gradient) {
-    console.log('gradient');
-    marks.push(areaY(chart.data, {
+    chartData.push(areaY(chart.data, {
       x: chart.label_column,
       y: chart.data_column,
       fill: 'url(#themed-area-fill)',
@@ -124,7 +134,7 @@ const Chart = ({chart, type, guides=ChartGuides.NONE, width, height, color, grad
     ];
   }
   const chartDef = defineChart({
-  marks: marks,
+  marks: chartData,
   scales: {
     x: {
       scale: () => scaleBand().padding(0.18),

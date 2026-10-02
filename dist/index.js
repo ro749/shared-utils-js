@@ -32,6 +32,7 @@ __export(src_exports, {
   Chart: () => Chart_default,
   ChartGuides: () => ChartGuides_default,
   ChartType: () => ChartType_default,
+  Colors: () => Colors_default,
   Dialog: () => Dialog_default,
   Form: () => Form,
   ImageUploader: () => ImageUploader_default,
@@ -1213,25 +1214,24 @@ var ChartGuides = Object.freeze({
 var ChartGuides_default = ChartGuides;
 
 // src/charts/Chart.jsx
-var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, color, gradient }) => {
-  console.log(chart);
-  var chartData = null;
+var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, size = 1, color, gradient }) => {
+  var chartData = [];
   switch (type) {
     case ChartType_default.BAR:
-      chartData = (0, import_charts.barY)(chart.data, {
+      chartData.push((0, import_charts.barY)(chart.data, {
         x: chart.label_column,
         y: chart.data_column
-      });
+      }));
       break;
     case ChartType_default.LINE:
-      chartData = (0, import_charts.lineY)(chart.data, {
+      chartData.push((0, import_charts.lineY)(chart.data, {
         x: chart.label_column,
         y: chart.data_column,
         stroke: color
-      });
+      }));
       break;
     case ChartType_default.PIE:
-      chartData = (0, import_polar.polar)({
+      chartData.push((0, import_polar.polar)({
         scales: {
           angle: null,
           radius: null
@@ -1244,10 +1244,10 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, co
             color: chart.label_column
           })
         ]
-      });
+      }));
       break;
     case ChartType_default.DONUT:
-      chartData = (0, import_polar.polar)({
+      chartData.push((0, import_polar.polar)({
         scales: {
           angle: null,
           radius: null
@@ -1261,12 +1261,16 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, co
             innerRadius: ({ radius }) => radius * 0.58
           })
         ]
-      });
+      }));
       break;
     case ChartType_default.RADIAL:
       const maxData = Math.max(...chart.data.map((d) => d[chart.data_column]));
-      console.log(maxData);
-      chartData = (0, import_polar.polar)({
+      var backgrounData = JSON.parse(JSON.stringify(chart.data));
+      for (var i = 0; i < backgrounData.length; i++) {
+        backgrounData[i][chart.data_column] = maxData;
+      }
+      chartData.push((0, import_polar.polar)({
+        radiusRatio: size,
         scales: {
           angle: {
             scale: (0, import_linear.scaleLinear)().domain([0, maxData])
@@ -1281,6 +1285,16 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, co
         },
         marks: [
           (0, import_polar.radialBarAngle)(
+            backgrounData,
+            {
+              angle: chart.data_column,
+              radius: chart.label_column,
+              key: chart.label_column,
+              fill: "#f4f4f4",
+              cornerRadius: "full"
+            }
+          ),
+          (0, import_polar.radialBarAngle)(
             chart.data,
             {
               angle: chart.data_column,
@@ -1291,12 +1305,11 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, co
             }
           )
         ]
-      });
+      }));
       break;
     default:
       chartData = null;
   }
-  var marks = [chartData];
   var gradients = [];
   var yaxis = {
     line: guides == ChartGuides_default.FULL,
@@ -1306,8 +1319,7 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, co
     }
   };
   if (gradient) {
-    console.log("gradient");
-    marks.push((0, import_charts.areaY)(chart.data, {
+    chartData.push((0, import_charts.areaY)(chart.data, {
       x: chart.label_column,
       y: chart.data_column,
       fill: "url(#themed-area-fill)"
@@ -1328,7 +1340,7 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, co
     ];
   }
   const chartDef = (0, import_charts.defineChart)({
-    marks,
+    marks: chartData,
     scales: {
       x: {
         scale: () => (0, import_band.scaleBand)().padding(0.18)
@@ -1353,11 +1365,17 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, co
   );
 };
 var Chart_default = Chart;
+
+// src/Colors.jsx
+var import_react33 = __toESM(require("react"));
+var Colors = ["#2563eb", "#f97316", "#10b981", "#8b5cf6", "#ec4899", "#06b6d4"];
+var Colors_default = Colors;
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   Chart,
   ChartGuides,
   ChartType,
+  Colors,
   Dialog,
   Form,
   ImageUploader,
