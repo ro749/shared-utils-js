@@ -13,10 +13,9 @@ import Form from '../forms/Form.jsx';
 import EditableTableRow from './EditableTableRow.jsx';
 import { getEnum } from '../EnumManager';
 export default function Table({ref, ...config}) {
-  
   const columnHelper = createColumnHelper();
   var cols = [];
-  for(let key in config.columns){ 
+  for(let key in config.columns){
     const columnConfig = config.columns[key];
     var modifier = (data) => data.getValue();
     switch(columnConfig.modifier){
@@ -41,7 +40,7 @@ export default function Table({ref, ...config}) {
       )
     );
   }
-  if(config.buttons.length > 0){
+  if(config.buttons && config.buttons.length > 0){
     cols.push(columnHelper.display({
       id: 'actions',
       cell: (info) => (
@@ -49,7 +48,7 @@ export default function Table({ref, ...config}) {
           {config.buttons.map((button, index) => {
             const IconComponent = IconMap[button.icon]
             const Wrapper = button.view ? "a" : React.Fragment;
-            const isDeleteButton = button.button_class == 'delete-btn';   
+            const isDeleteButton = button.button_class == 'delete-btn';
             const isEditButton = button.button_class == 'edit-btn';
             return (
               <Wrapper key={index} href={button.view?(button.view.url+'?'+button.view.name+'='+info.row.original[button.view.param]):undefined}>
@@ -111,10 +110,10 @@ export default function Table({ref, ...config}) {
       params.set('page', pagination.pageIndex + 1);
       params.set('length', pagination.pageSize);
     }
-    
+
     const searchParam = config.searchParam ?? 'search[value]';
     if (globalFilter && searchParam) params.set(searchParam, globalFilter);
-    
+
     if (sorting.length > 0) {
       const sort = sorting[0];
       params.set('order[0][column]', sort.id);
@@ -153,7 +152,7 @@ export default function Table({ref, ...config}) {
     setActiveFilters((prev) => {
       const isActive = prev[filterKey] === optionKey;
       const filterConfig = config.filters[filterKey];
-      
+
       if (isActive) {
         if (filterConfig.default === '') {
           const { [filterKey]: removed, ...rest } = prev;
@@ -181,7 +180,7 @@ export default function Table({ref, ...config}) {
         processedWarning = processedWarning.replace('{' + arg + '}', row[arg]);
       }
     }
-    
+
     setDeletePopup({ show: true, warning: processedWarning, row });
   };
 
@@ -272,7 +271,7 @@ export default function Table({ref, ...config}) {
               </div>
             ))}
             <div className="dt-search">
-            <label>Buscar:</label> 
+            <label>Buscar:</label>
             <input
               type="search"
               value={globalFilter}
@@ -282,16 +281,16 @@ export default function Table({ref, ...config}) {
             />
             </div>
           </div>
-          
+
         </div>
       )}
-      
+
       <table className="table bordered-table mb-0 dataTable" style={{width: "97.2222%"}} >
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <th 
+                <th
                   key={header.id}
                   onClick={header.column.getToggleSortingHandler()}
                   style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
@@ -303,7 +302,7 @@ export default function Table({ref, ...config}) {
                       {config.page_length != null && (
                         <span className="dt-column-order"></span>
                       )}
-                      
+
                     </div>
                   )}
                 </th>
@@ -312,8 +311,8 @@ export default function Table({ref, ...config}) {
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) =>{ 
-            return editRow!= null && editRow.id == row.original.id ? 
+          {table.getRowModel().rows.map((row) =>{
+            return editRow!= null && editRow.id == row.original.id ?
             (
               <EditableTableRow
                 key={row.id}
@@ -353,7 +352,7 @@ export default function Table({ref, ...config}) {
       </table>
       {config.page_length != null && (
         <div className="dt-layout-row">
-          <div className="dt-layout-cell dt-layout-start"> 
+          <div className="dt-layout-cell dt-layout-start">
             Mostrando {totalRows === 0 ? 0 : pagination.pageIndex * pagination.pageSize + 1} a {Math.min((pagination.pageIndex + 1) * pagination.pageSize, totalRows)} de {totalRows} registros
           </div>
           <div className="dt-layout-cell dt-layout-end">
@@ -447,23 +446,23 @@ export default function Table({ref, ...config}) {
                 Última
               </button>
             </div>
-            
+
           </div>
         </div>
       )}
-      
-      <Dialog 
-        isOpen={deletePopup.show} 
+
+      <Dialog
+        isOpen={deletePopup.show}
         onClose={() => setDeletePopup({ show: false, warning: '', row: null })}
         title="Confirmar eliminación"
         actions={[
-           { 
-            label: 'Cancelar', 
+           {
+            label: 'Cancelar',
             onClick: () => setDeletePopup({ show: false, warning: '', row: null }),
             className: 'btn-warning-600'
           },
-          { 
-            label: 'Eliminar', 
+          {
+            label: 'Eliminar',
             onClick: () => handleConfirmDelete(),
             className: 'btn-danger-600'
           }
