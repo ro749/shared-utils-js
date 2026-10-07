@@ -5,14 +5,14 @@ import Dialog from '../dialogs/Dialog';
 import { useForm, useSelector } from '@tanstack/react-form'
 import useRecordForm from './useRecordForm';
 export default function Form(config) {
-  
+
   const inputRefs = useRef(new Set());
   function setInputRef(ref) {
     if (ref) {
       inputRefs.current.add(ref);
     }
   }
-  const reset = () => { 
+  const reset = () => {
     inputRefs.current.forEach(input => input.reset?.());
   };
   const { form, showSuccessDialog, setShowSuccessDialog } = useRecordForm(config, undefined, reset);
@@ -20,7 +20,7 @@ export default function Form(config) {
 
   return (
     <>
-      <form 
+      <form
       id={config.id}
       onSubmit={async (e) => {
           e.preventDefault()
@@ -60,12 +60,12 @@ export default function Form(config) {
           <button type="submit">{config.submit_text}</button>
         </div>
       </form>
-      <Dialog 
-        isOpen={showSuccessDialog} 
+      <Dialog
+        isOpen={showSuccessDialog}
         onClose={() => setShowSuccessDialog(false)}
         title="Success"
       >
-        {config.success_msg || 'Form submitted successfully'}
+        {config.success_msg}
       </Dialog>
     </>
   );

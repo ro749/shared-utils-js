@@ -7,10 +7,13 @@ import { tooltip } from '@tanstack/charts/tooltip';
 import { Chart as TanstackChart } from '@tanstack/charts/react';
 import ChartType from './ChartType';
 import ChartGuides from "./ChartGuides";
-const Chart = ({ chart, type, guides=ChartGuides.NONE, width, height, size=1, color, gradient}) => {
-    var chartData = [];
+const Chart = ({ chart, type, guides=ChartGuides.NONE, width, height, size=1, color, gradient,debug = false}) => {
+  if (debug) {
+    console.log(chart);
+  }
+  var chartData = [];
     switch (type) {
-        case ChartType.BAR:
+      case ChartType.BAR:
             chartData.push(barY(chart.data, {
                 x: chart.label_column,
                 y: chart.data_column,
@@ -104,6 +107,9 @@ const Chart = ({ chart, type, guides=ChartGuides.NONE, width, height, size=1, co
         default:
             chartData = null;
   }
+  if (debug) {
+    console.log(chartData);
+  }
   var gradients = [];
   var yaxis = {
     line: guides == ChartGuides.FULL,
@@ -148,7 +154,6 @@ const Chart = ({ chart, type, guides=ChartGuides.NONE, width, height, size=1, co
   gradients: gradients,
   tooltip,
 })
-
   return (
     <TanstackChart
       definition={chartDef}

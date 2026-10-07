@@ -30,22 +30,23 @@ const INPUT_COMPONENTS = {
 const FormField = ({ ref, form, field, fieldName, value, formId, error, resetKey, preview_table }) => {
   console.log(field);
   const Component = INPUT_COMPONENTS[field.type];
-  
+
   return (
-    <form.Field 
+    <form.Field
       name={fieldName}
       children={(fieldProps) => {
         return (
         <>
           <label>
             {field.label}{field.required && <span>*</span>}
-            <Component 
+            <Component
               field={fieldProps}
-              id={fieldName} 
-              formId={formId} 
-              max={field.max} 
-              options={field.options} 
-              search={field.search} 
+                id={fieldName}
+                form={form}
+              formId={formId}
+              max={field.max}
+              options={field.options}
+              search={field.search}
               dynamic={field.dynamic}
               imageUrl={field.imageUrl}
               resetKey={resetKey}

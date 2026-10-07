@@ -379,7 +379,7 @@ var Select_default = Select;
 
 // src/forms/ImageUploader.jsx
 var import_react10 = __toESM(require("react"));
-var ImageUploader = ({ value, field, id, name, imageUrl }) => {
+var ImageUploader = ({ value, field, id, name, imageUrl, form }) => {
   const [preview, setPreview] = (0, import_react10.useState)(imageUrl || null);
   const fileInputRef = (0, import_react10.useRef)(null);
   (0, import_react10.useEffect)(() => {
@@ -397,6 +397,7 @@ var ImageUploader = ({ value, field, id, name, imageUrl }) => {
         setPreview(reader.result);
       };
       reader.readAsDataURL(file);
+      form.handleSubmit();
     }
   };
   return /* @__PURE__ */ import_react10.default.createElement(import_react10.default.Fragment, null, /* @__PURE__ */ import_react10.default.createElement(
@@ -561,7 +562,12 @@ function useRecordForm(config, defaultValues, reset) {
         if (res.data.redirect) {
           window.location.href = res.data.redirect;
         } else {
-          setShowSuccessDialog(true);
+          console.log("a");
+          console.log(config);
+          console.log(config.success_msg);
+          if (config.success_msg != "") {
+            setShowSuccessDialog(true);
+          }
           (_a = config.onSuccess) == null ? void 0 : _a.call(config, value);
           formApi.reset();
           reset == null ? void 0 : reset();
@@ -665,7 +671,7 @@ function Table({ ref, ...config }) {
       )
     );
   }
-  if (config.buttons.length > 0) {
+  if (config.buttons && config.buttons.length > 0) {
     cols.push(columnHelper.display({
       id: "actions",
       cell: (info) => /* @__PURE__ */ import_react21.default.createElement("div", { className: "normal-buttons", key: info.row.id }, config.buttons.map((button, index) => {
@@ -1062,6 +1068,7 @@ var FormField = ({ ref, form, field, fieldName, value, formId, error, resetKey, 
           {
             field: fieldProps,
             id: fieldName,
+            form,
             formId,
             max: field.max,
             options: field.options,
@@ -1141,7 +1148,7 @@ function Form(config) {
       onClose: () => setShowSuccessDialog(false),
       title: "Success"
     },
-    config.success_msg || "Form submitted successfully"
+    config.success_msg
   ));
 }
 
@@ -1214,7 +1221,10 @@ var ChartGuides = Object.freeze({
 var ChartGuides_default = ChartGuides;
 
 // src/charts/Chart.jsx
-var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, size = 1, color, gradient }) => {
+var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, size = 1, color, gradient, debug = false }) => {
+  if (debug) {
+    console.log(chart);
+  }
   var chartData = [];
   switch (type) {
     case ChartType_default.BAR:
@@ -1309,6 +1319,9 @@ var Chart = ({ chart, type, guides = ChartGuides_default.NONE, width, height, si
       break;
     default:
       chartData = null;
+  }
+  if (debug) {
+    console.log(chartData);
   }
   var gradients = [];
   var yaxis = {

@@ -26,8 +26,13 @@ function useRecordForm(config, defaultValues, reset) {
         if(res.data.redirect){
           window.location.href = res.data.redirect;
         }
-        else{
-          setShowSuccessDialog(true);
+        else {
+          console.log("a");
+          console.log(config);
+          console.log(config.success_msg);
+          if (config.success_msg != '') {
+            setShowSuccessDialog(true);
+          }
           config.onSuccess?.(value);
           formApi.reset();
           reset?.();
@@ -39,7 +44,7 @@ function useRecordForm(config, defaultValues, reset) {
           onSubmit: { fields: apiErrors, form: "Submission failed. Please correct the errors below." }
         });
       }
-      
+
     }
   });
 

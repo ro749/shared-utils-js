@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 
-const ImageUploader = ({ value, field, id, name, imageUrl }) => {
+const ImageUploader = ({ value, field, id, name, imageUrl, form }) => {
   const [preview, setPreview] = useState(imageUrl || null);
   const fileInputRef = useRef(null);
 
@@ -20,6 +20,7 @@ const ImageUploader = ({ value, field, id, name, imageUrl }) => {
         setPreview(reader.result);
       };
       reader.readAsDataURL(file);
+      form.handleSubmit();
     }
   };
   return (
@@ -34,9 +35,9 @@ const ImageUploader = ({ value, field, id, name, imageUrl }) => {
         style={{ display: 'none' }}
       />
       {preview ? (
-        <img 
-          src={preview} 
-          alt="Preview" 
+        <img
+          src={preview}
+          alt="Preview"
           className="image-preview"
           /*style={{
             width: '200px',
@@ -48,7 +49,7 @@ const ImageUploader = ({ value, field, id, name, imageUrl }) => {
           }}*/
         />
       ) : (
-        <div 
+        <div
           className="image-placeholder"
           style={{
             width: '200px',
