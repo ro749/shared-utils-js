@@ -12,9 +12,16 @@ import Dialog from '../dialogs/Dialog';
 import Form from '../forms/Form.jsx';
 import EditableTableRow from './EditableTableRow.jsx';
 import { getEnum } from '../EnumManager';
-export default function Table({ref, ...config}) {
+export default function Table({ ref, ...config }) {
+  console.log(config);
   const columnHelper = createColumnHelper();
   var cols = [];
+  var perPage = [];
+  var info = "";
+  if (config.texts.lengthMenu) {
+    perPage = config.texts.lengthMenu.split("_MENU_");
+  }
+
   for(let key in config.columns){
     const columnConfig = config.columns[key];
     var modifier = (data) => data.getValue();
@@ -76,6 +83,7 @@ export default function Table({ref, ...config}) {
   const [globalFilter, setGlobalFilter] = useState('');
   const [sorting, setSorting] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
+  const [infoText, setInfoText] = useState("");
   const [editRow, setEditRow] = useState(null);
   const [activeFilters, setActiveFilters] = useState(() => {
     const initialFilters = {};
@@ -132,8 +140,15 @@ export default function Table({ref, ...config}) {
         return res.json();
       })
       .then((response) => {
+        console.log(pagination);
         setData(response.data ?? []);
-        setTotalRows(response.recordsFiltered ?? response.total ?? response.recordsTotal ?? 0);
+        var total = response.recordsFiltered ?? response.total ?? response.recordsTotal ?? 0;
+        setTotalRows(total);
+        var infoStr = config.texts.info;
+        infoStr = infoStr.replace("_START_", total === 0 ? 0 : pagination.pageIndex * pagination.pageSize + 1);
+        infoStr = infoStr.replace("_END_", Math.min((pagination.pageIndex + 1) * pagination.pageSize, total));
+        infoStr = infoStr.replace("_TOTAL_", total);
+        setInfoText(infoStr);
       })
       .catch((error) => {
         if (error.name !== 'AbortError') throw error;
@@ -239,20 +254,22 @@ export default function Table({ref, ...config}) {
     editData,
     reset,
   }));
-
   return (
     <div className="dt-container">
       {config.page_length != null && (
         <div className="dt-layout-row">
           <div className="dt-layout-cell dt-layout-start">
+            {perPage[0]}
             <select
               value={pagination.pageSize}
               onChange={(event) => table.setPageSize(Number(event.target.value))}
+              className="table-select"
             >
               {(config.pageSizes ?? [10, 25, 50, 100]).map((size) => (
-                <option key={size} value={size}>{size} per page</option>
+                <option key={size} value={size}>{size}</option>
               ))}
             </select>
+            {perPage[1]}
           </div>
           <div className="dt-layout-cell dt-layout-end" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', gap: '6px' }}>
             {config.filters && Object.entries(config.filters).map(([filterKey, filter]) => (
@@ -271,7 +288,7 @@ export default function Table({ref, ...config}) {
               </div>
             ))}
             <div className="dt-search">
-            <label>Buscar:</label>
+              <label>{config.texts.search} </label>
             <input
               type="search"
               value={globalFilter}
@@ -285,7 +302,7 @@ export default function Table({ref, ...config}) {
         </div>
       )}
 
-      <table className="table bordered-table mb-0 dataTable" style={{width: "97.2222%"}} >
+      <table className="table bordered-table mb-0 dataTable">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
@@ -311,7 +328,7 @@ export default function Table({ref, ...config}) {
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) =>{
+          {totalRows != 0 && table.getRowModel().rows.map((row) =>{
             return editRow!= null && editRow.id == row.original.id ?
             (
               <EditableTableRow
@@ -335,6 +352,13 @@ export default function Table({ref, ...config}) {
               </tr>
             );
           })}
+          {totalRows == 0 && (
+            <tr>
+              <td colSpan={Object.keys(config.columns).length+(config.buttons.length>0?1:0)} className="dt-empty">
+                {config.texts.emptyTable}
+              </td>
+            </tr>
+          )}
         </tbody>
         <tfoot>
           {table.getFooterGroups().map((footerGroup) => (
@@ -353,7 +377,7 @@ export default function Table({ref, ...config}) {
       {config.page_length != null && (
         <div className="dt-layout-row">
           <div className="dt-layout-cell dt-layout-start">
-            Mostrando {totalRows === 0 ? 0 : pagination.pageIndex * pagination.pageSize + 1} a {Math.min((pagination.pageIndex + 1) * pagination.pageSize, totalRows)} de {totalRows} registros
+            {infoText}
           </div>
           <div className="dt-layout-cell dt-layout-end">
             <div className="dt-paging" style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
@@ -363,7 +387,7 @@ export default function Table({ref, ...config}) {
                 disabled={!table.getCanPreviousPage()}
                 style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid #d1d5db', background: '#f3f4f6', cursor: !table.getCanPreviousPage() ? 'not-allowed' : 'pointer', opacity: !table.getCanPreviousPage() ? 0.5 : 1 }}
               >
-                Primera
+                {config.texts.paginate.first}
               </button>
               <button
                 type="button"
@@ -371,7 +395,7 @@ export default function Table({ref, ...config}) {
                 disabled={!table.getCanPreviousPage()}
                 style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid #d1d5db', background: '#f3f4f6', cursor: !table.getCanPreviousPage() ? 'not-allowed' : 'pointer', opacity: !table.getCanPreviousPage() ? 0.5 : 1 }}
               >
-                Anterior
+                {config.texts.paginate.previous}
               </button>
               {(() => {
                 const pageCount = table.getPageCount();
@@ -435,7 +459,7 @@ export default function Table({ref, ...config}) {
                 disabled={!table.getCanNextPage()}
                 style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid #d1d5db', background: '#f3f4f6', cursor: !table.getCanNextPage() ? 'not-allowed' : 'pointer', opacity: !table.getCanNextPage() ? 0.5 : 1 }}
               >
-                Siguiente
+                {config.texts.paginate.next}
               </button>
               <button
                 type="button"
@@ -443,7 +467,7 @@ export default function Table({ref, ...config}) {
                 disabled={!table.getCanNextPage()}
                 style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid #d1d5db', background: '#f3f4f6', cursor: !table.getCanNextPage() ? 'not-allowed' : 'pointer', opacity: !table.getCanNextPage() ? 0.5 : 1 }}
               >
-                Última
+                {config.texts.paginate.last}
               </button>
             </div>
 
