@@ -13,7 +13,6 @@ import Form from '../forms/Form.jsx';
 import EditableTableRow from './EditableTableRow.jsx';
 import { getEnum } from '../EnumManager';
 export default function Table({ ref, ...config }) {
-  console.log(config);
   const columnHelper = createColumnHelper();
   var cols = [];
   var perPage = [];
