@@ -28,7 +28,6 @@ const INPUT_COMPONENTS = {
 };
 
 const FormField = ({ ref, form, field, fieldName, value, formId, error, resetKey, preview_table }) => {
-  console.log(field);
   const Component = INPUT_COMPONENTS[field.type];
 
   return (

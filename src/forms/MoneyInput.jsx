@@ -57,6 +57,7 @@ const MoneyInput = ({value, field, onChange, ...props}) => {
         }
         if(currentCount == cursor){
             cursorRef.current = currentPosition;
+      while(currentCount != cursor && currentPosition <= formatedValue.length){
         }
         if(newValue[0] == '0'){
             newValue = newValue.slice(1);

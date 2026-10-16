@@ -1,9 +1,10 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 
-const Input = ({ref, value, field, onChange, ...props}) => {
-    const internalRef = useRef(null);
-        const inputRef = ref || internalRef;
-
+const Input = ({ outRef=null, value, field, onChange, ...props }) => {
+  const internalRef = useRef(null);
+    const inputRef = outRef || internalRef;
+    useEffect(() => {
+      }, []);
     function handleChange(e){
         if(field != undefined){
             field.handleChange(e.target.value);
@@ -11,12 +12,9 @@ const Input = ({ref, value, field, onChange, ...props}) => {
         if(onChange != undefined){
             onChange(e.target.value);
         }
-    } 
-
-
-
+    }
     return (
-        <input 
+        <input
             ref={inputRef}
             id={props.id}
             name={props.id}
